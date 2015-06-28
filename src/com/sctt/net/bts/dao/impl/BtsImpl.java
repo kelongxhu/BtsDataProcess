@@ -34,8 +34,13 @@ public class BtsImpl implements BtsDao {
 	public List<Cell> getCells() throws Exception {
 		StringBuilder sb = new StringBuilder();
 		sb.append("select a.int_id,a.name,a.bsc_name,a.btsid,a.bts_name,a.related_bts,B.base_long_b LONGITUDE,B.base_lat_b LATITUDE,a.cellid,a.ci,a.pn,a.lac,a.do_cell,c.vendor_btstype,a.city_id from c_cell a "
-				+ "left join c_tzx_par_cell b on a.int_id=b.int_id LEFT JOIN c_bts c ON a.related_bts=c.int_id");
+				+ "left join c_tzx_par_cell b on a.int_id=b.int_id LEFT JOIN c_bts c ON a.related_bts=c.int_id where a.bsc_name NOT LIKE '%华为%'");
+		StringBuilder sb2 = new StringBuilder();
+		sb2.append("select a.int_id,a.name,a.bsc_name,a.btsid,a.bts_name,a.related_bts,B.base_long_b LONGITUDE,B.base_lat_b LATITUDE,a.cellid,a.ci,a.pn,a.lac,a.do_cell,c.vendor_btstype,a.city_id from c_cell a "
+				+ "left join c_tzx_par_cell b on a.int_id=b.int_id LEFT JOIN c_bts c ON a.related_bts=c.int_id where a.bsc_name LIKE '%华为%'");
 		List list = jdbcTemplate.queryForList(sb.toString());
+		List list2= jdbcTemplate.queryForList(sb2.toString());
+		list.addAll(list2);
 		List<Cell> result = new ArrayList<Cell>();
 		for (int i = 0; i < list.size(); i++) {
 			Map map = (Map) list.get(i);

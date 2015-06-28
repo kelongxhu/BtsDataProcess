@@ -422,7 +422,7 @@ public class BtsAnalyse extends TimerTask {
 	 * @return:true:符合规则
 	 */
 	public boolean isRight(String str) {
-		String[] rang = { "电", "联", "移", "电联", "电移" };
+		String[] rang = { "电", "联", "移", "电联", "电移","铁"};
 		boolean flag = false;
 		for (String s : rang) {
 			if (s.equals(str.trim())) {
