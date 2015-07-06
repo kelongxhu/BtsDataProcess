@@ -40,7 +40,7 @@ public class BtsImpl implements BtsDao {
 		sb.append("select a.int_id,a.name,a.bsc_name,a.btsid,a.bts_name,a.related_bts,B.base_long_b LONGITUDE,B.base_lat_b LATITUDE,a.cellid,a.ci,a.pn,a.lac,a.do_cell,c.vendor_btstype,a.city_id from c_cell a "
 				+ "left join c_tzx_par_cell b on a.int_id=b.int_id LEFT JOIN c_bts c ON a.related_bts=c.int_id where a.bsc_name NOT LIKE '%华为%'");
 		StringBuilder sb2 = new StringBuilder();
-		sb2.append("select a.int_id,a.name,a.bsc_name,a.btsid,a.bts_name,a.related_bts,B.bslong LONGITUDE,B.bslat LATITUDE,,a.cellid,a.ci,a.pn,a.lac,a.do_cell,c.vendor_btstype,a.city_id from c_cell a "
+		sb2.append("select a.int_id,a.name,a.bsc_name,a.btsid,a.bts_name,a.related_bts,b.bslong LONGITUDE,b.bslat LATITUDE,a.cellid,a.ci,a.pn,a.lac,a.do_cell,c.vendor_btstype,a.city_id from c_cell a "
 				+ "left join c_thw_par_cell_1x b on a.int_id=b.int_id LEFT JOIN c_bts c ON a.related_bts=c.int_id where a.bsc_name LIKE '%华为%'");
 		List list = jdbcTemplate.queryForList(sb.toString());
 		List list2= jdbcTemplate.queryForList(sb2.toString());
@@ -552,7 +552,7 @@ public class BtsImpl implements BtsDao {
 
 	@Override
 	public int updateWyBtsSpecial(WyBtsSpecial wyBtsSpecial) throws Exception {
-		String sql = "UPDATE WY_BTS_SPECIAL SET NAME=?,CITY_ID=?，BSC_NAME=?,BTS_ID=?,BTSNAME=?,UPDATETIME=SYSDATE,TYPE=?,NET_TYPE=?,STATE=? where INT_ID=?)";
+		String sql = "UPDATE WY_BTS_SPECIAL SET NAME=?,CITY_ID=?，BSC_NAME=?,BTS_ID=?,BTSNAME=?,UPDATETIME=SYSDATE,TYPE=?,NET_TYPE=?,STATE=? where INT_ID=?";
 		Object[] params = new Object[] {wyBtsSpecial.getName(),wyBtsSpecial.getCityId(),
 				wyBtsSpecial.getBscName(), wyBtsSpecial.getBtsId(), wyBtsSpecial.getBtsName(),wyBtsSpecial.getType(),wyBtsSpecial.getNetType(),
 				wyBtsSpecial.getState(),wyBtsSpecial.getIntId()};
