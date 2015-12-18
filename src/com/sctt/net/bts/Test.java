@@ -7,8 +7,8 @@ import org.springframework.beans.factory.xml.XmlBeanFactory;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 
-import com.sctt.net.bts.analyse.BtsAnalyse;
-import com.sctt.net.bts.bean.Cell;
+import com.sctt.net.bts.analyse.cdma.BtsAnalyse;
+import com.sctt.net.bts.bean.cdma.Cell;
 import com.sctt.net.bts.dao.BtsDao;
 import com.sctt.net.common.util.DateHelper;
 

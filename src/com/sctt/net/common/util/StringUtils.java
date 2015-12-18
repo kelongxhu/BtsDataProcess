@@ -69,5 +69,16 @@ public class StringUtils {
 			return 0;
 		}
 	}
+	/**
+	 * ×Ö·û´®ÊÇ·ñžé¿Õ
+	 * @param str
+	 * @return
+	 */
+	public static boolean isEmpty(String str){
+		if(str==null||"".equals(str)){
+			return true;
+		}
+		return false;
+	}
 
 }

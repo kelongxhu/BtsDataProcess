@@ -3,15 +3,15 @@ package com.sctt.net.bts.dao;
 import java.util.List;
 import java.util.Map;
 
-import com.sctt.net.bts.bean.Bts;
-import com.sctt.net.bts.bean.BtsSite;
-import com.sctt.net.bts.bean.Cell;
-import com.sctt.net.bts.bean.Country;
-import com.sctt.net.bts.bean.TunelLib;
-import com.sctt.net.bts.bean.TunelSite;
-import com.sctt.net.bts.bean.WyBbu;
-import com.sctt.net.bts.bean.WyBtsSpecial;
-import com.sctt.net.bts.bean.WyWrongName;
+import com.sctt.net.bts.bean.cdma.Bts;
+import com.sctt.net.bts.bean.cdma.BtsSite;
+import com.sctt.net.bts.bean.cdma.Cell;
+import com.sctt.net.bts.bean.cdma.Country;
+import com.sctt.net.bts.bean.cdma.TunelLib;
+import com.sctt.net.bts.bean.cdma.TunelSite;
+import com.sctt.net.bts.bean.cdma.WyBbu;
+import com.sctt.net.bts.bean.cdma.WyBtsSpecial;
+import com.sctt.net.bts.bean.cdma.WyWrongName;
 
 public interface BtsDao {
 	List<Cell> getCells() throws Exception;
