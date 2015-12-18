@@ -109,6 +109,13 @@
 		</property>
 	</bean>
 	
+	
+	<bean id="lteDao" class="com.sctt.net.bts.dao.impl.LteDaoImpl">
+		<property name="jdbcTemplate">
+			<ref bean="jdbcTemplate" />
+		</property>
+	</bean>
+	
 	<bean id="baseConstants" class="com.sctt.net.common.util.BaseConstants">
 		<property name="flag" value="0"/>
 	</bean>
