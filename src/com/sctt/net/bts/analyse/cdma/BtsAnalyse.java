@@ -3,7 +3,6 @@ package com.sctt.net.bts.analyse.cdma;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TimerTask;
 
 import org.apache.log4j.Logger;
 
@@ -17,7 +16,9 @@ import com.sctt.net.bts.bean.cdma.WyBbu;
 import com.sctt.net.bts.bean.cdma.WyBtsSpecial;
 import com.sctt.net.bts.bean.cdma.WyWrongName;
 import com.sctt.net.bts.dao.BtsDao;
+import com.sctt.net.bts.service.BizService;
 import com.sctt.net.common.util.AnalyseUtil;
+import com.sctt.net.common.util.Constants;
 import com.sctt.net.common.util.StringUtils;
 
 /**
@@ -27,13 +28,15 @@ import com.sctt.net.common.util.StringUtils;
  * 
  */
 
-public class BtsAnalyse extends TimerTask {
+public class BtsAnalyse implements Runnable {
 
 	private static Logger logger = Logger.getLogger("baseLog");
 	private BtsDao btsDao;
+	private BizService bizService;
 
-	public BtsAnalyse(BtsDao btsDao) {
+	public BtsAnalyse(BtsDao btsDao,BizService bizService) {
 		this.btsDao = btsDao;
+		this.bizService=bizService;
 	}
 
 	public void run() {
@@ -65,12 +68,12 @@ public class BtsAnalyse extends TimerTask {
 			logger.info("++++分析物理站点开始:");
 			cells = btsDao.getCells();
 			yesMap = btsDao.getBtsSites();
-			yesWwnMap = btsDao.getWwns();
+			yesWwnMap = btsDao.getWwns(Constants.CDMA);
 			countryMap = btsDao.getCountrys();
 			yesCellMap = btsDao.getWyCell();
 			yesTunelMap = btsDao.getTunels();
 			yesTunelLibMap = btsDao.getTunelLib();
-			yesSpecialMap=btsDao.getBtsSpecial();
+			yesSpecialMap=btsDao.getBtsSpecial(Constants.CDMA);
 			logger.info("从网管c_cell采集到小区数据：" + cells.size());
 			logger.info("wy_bts采集到物理站点数据:" + yesMap.size());
 			logger.info("wy_wrongname采集到原有错误小区数据：" + yesWwnMap.size());
@@ -156,8 +159,8 @@ public class BtsAnalyse extends TimerTask {
 			logger.info("解析到特殊状态站点数量:"+specialMap.size());
 			// 增量更新
 			bbuUpdate(bbuMap, yesBbuMap);
-			wwnUpdate(wrongMap, yesWwnMap);
-			specialBtsUpdate(specialMap,yesSpecialMap);
+			bizService.wwnUpdate(wrongMap, yesWwnMap);
+			bizService.specialBtsUpdate(specialMap,yesSpecialMap);
 			logger.info("++++分析BBU结束...");
 
 		} catch (Exception e) {
@@ -329,53 +332,6 @@ public class BtsAnalyse extends TimerTask {
 	}
 
 	/**
-	 * 错误小区名称表实现增量更新
-	 * 
-	 * @param wrongMap
-	 *            :先分析出的错误小区
-	 * @param yesWwnMap
-	 *            ：数据库中存储的错误小区
-	 */
-	public void wwnUpdate(Map<String, WyWrongName> wrongMap,
-			Map<String, WyWrongName> yesWwnMap) {
-		int i = 0;
-		int j = 0;
-		int q = 0;
-		try {
-			logger.info("++++错误小区增量分析中...");
-			for (String keyObj : wrongMap.keySet()) {
-				WyWrongName wwN = yesWwnMap.get(keyObj);
-				WyWrongName updateWwn = wrongMap.get(keyObj);
-				if (wwN != null) {
-					// 更新
-					btsDao.updateWyWrongName(updateWwn);
-					i++;
-				} else {
-					// 新增
-					btsDao.insertWyWrongName(updateWwn);
-					j++;
-				}
-			}
-			// 或许小区命名已经更改
-			for (String keyObj : yesWwnMap.keySet()) {
-				WyWrongName wwN = wrongMap.get(keyObj);
-				WyWrongName updateWwn = yesWwnMap.get(keyObj);
-				if (wwN == null) {
-					// 已更改正确
-					int deleteFlag = updateWwn.getDeleteFlag();
-					if (deleteFlag == 0) {
-						btsDao.updateWyWrongNameByDelFlag(updateWwn);
-						q++;
-					}
-				}
-			}
-			logger.info("错误小区增量结果：更新：" + i + ";新增：" + j + ";废弃：" + q);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-
-	/**
 	 * wy_cell增量更新
 	 * 
 	 * @param cellMap
@@ -470,54 +426,6 @@ public class BtsAnalyse extends TimerTask {
 			logger.error(e.getMessage(), e);
 		}
 	}
-	
-	
-	/**
-	 * wy_special增量更新
-	 * 
-	 * @param bbuMap
-	 * @param yesBbuMap
-	 */
-	public void specialBtsUpdate(Map<String, WyBtsSpecial> specialMap,
-			Map<String, WyBtsSpecial> yesSpecialMap) {
-		int i = 0;
-		int j = 0;
-		int q = 0;
-		logger.info("++++特殊站点增量更新中...");
-		try {
-			for (String keyObj : specialMap.keySet()) {
-				WyBtsSpecial special = yesSpecialMap.get(keyObj);
-				WyBtsSpecial specialUpdate = specialMap.get(keyObj);
-				if (special != null) {
-					// 更新字段
-					btsDao.updateWyBtsSpecial(specialUpdate);
-					i++;
-				} else {
-					// 新增
-					btsDao.insertWyBtsSpecial(specialUpdate);
-					j++;
-				}
-			}
-			// 废弃
-			for (String keyObj : yesSpecialMap.keySet()) {
-				WyBtsSpecial special = specialMap.get(keyObj);
-				WyBtsSpecial specialUpdate = yesSpecialMap.get(keyObj);
-				if (special == null) {
-					// 废弃
-					int deleteFlag = specialUpdate.getDeleteFlag();
-					if (deleteFlag == 0) {
-						btsDao.updateWyBtsSpecialByDelFlag(specialUpdate);
-						q++;
-					}
-				}
-			}
-			logger.info("wy_bts_specail增量结果：更新：" + i + ";新增：" + j + ";废弃：" + q);
-		} catch (Exception e) {
-			e.printStackTrace();
-			logger.error(e.getMessage(), e);
-		}
-	}
-
 	/**
 	 * 小区命名规则判断
 	 * 

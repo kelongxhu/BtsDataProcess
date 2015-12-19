@@ -1,16 +1,11 @@
 package com.sctt.net.bts;
 
-import java.util.List;
-
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanFactory;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 
-import com.sctt.net.bts.analyse.cdma.BtsAnalyse;
-import com.sctt.net.bts.bean.cdma.Cell;
 import com.sctt.net.bts.dao.BtsDao;
-import com.sctt.net.common.util.DateHelper;
 
 public class Test {
 
@@ -31,9 +26,9 @@ public class Test {
 //		 System.out.println("你好吗".hashCode());
 //		 System.out.println("你好".hashCode());
 //		 
-		 BtsAnalyse btsAnalyse=new BtsAnalyse(btsDao);
+//		 BtsAnalyse btsAnalyse=new BtsAnalyse(btsDao);
 //		 btsAnalyse.test2();
-		 btsAnalyse.test();
+//		 btsAnalyse.test();
 		 
 		 
 //		 String s="aaaa_新建";

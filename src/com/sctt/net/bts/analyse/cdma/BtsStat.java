@@ -16,6 +16,7 @@ import com.sctt.net.bts.bean.cdma.TunelSite;
 import com.sctt.net.bts.bean.cdma.WyBtsSpecial;
 import com.sctt.net.bts.bean.cdma.WyWrongName;
 import com.sctt.net.common.util.AnalyseUtil;
+import com.sctt.net.common.util.Constants;
 
 public class BtsStat {
 	private static Logger logger = Logger.getLogger("baseLog");
@@ -218,7 +219,8 @@ public class BtsStat {
 		wwN.setBtsId(cell.getBtsId());
 		wwN.setBscName(cell.getBscName());
 		wwN.setBtsName(cell.getBtsName());
-		wwN.setType(1);
+		wwN.setNetType(Constants.CDMA);// CDMA
+		wwN.setType(Constants.CELL);
 		wwN.setCityId(InitInstance.getInstance().getCityId(
 				cell.getSourceCityId() + ""));
 		wrongMap.put(cell.getIntId() + "", wwN);
@@ -230,10 +232,10 @@ public class BtsStat {
 		wwN.setCellName(bbu.getName());
 		wwN.setBtsId(bbu.getBtsId());
 		wwN.setBscName(bbu.getBscName());
+		wwN.setNetType(Constants.CDMA);// CDMA
 		wwN.setCityId(InitInstance.getInstance().getCityId(
 				bbu.getSourceCityId() + ""));
-		// wwN.setBtsName();
-		wwN.setType(2);
+		wwN.setType(Constants.BBU);
 		wrongMap.put(bbu.getIntId() + "", wwN);
 	}
 
@@ -253,7 +255,7 @@ public class BtsStat {
 		btsSpecical.setName(cell.getName());
 		btsSpecical.setDeleteFlag(0);
 		btsSpecical.setInTime(new Date());
-		btsSpecical.setNetType(1);// CDMA
+		btsSpecical.setNetType(Constants.CDMA);// CDMA
 		btsSpecical.setState(getSpecicalState(type));
 		btsSpecical.setType(1);
 		btsSpecialMap.put(cell.getIntId()+"", btsSpecical);
@@ -276,7 +278,7 @@ public class BtsStat {
 		btsSpecical.setName(bts.getName());
 		btsSpecical.setDeleteFlag(0);
 		btsSpecical.setInTime(new Date());
-		btsSpecical.setNetType(1);// CDMA
+		btsSpecical.setNetType(Constants.CDMA);// CDMA
 		btsSpecical.setState(getSpecicalState(type));
 		btsSpecical.setType(2);//Õ¾µã
 		btsSpecialMap.put(bts.getIntId()+"", btsSpecical);

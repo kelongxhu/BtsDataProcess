@@ -30,7 +30,7 @@ public interface BtsDao {
 
 	int updateWyWrongNameByDelFlag(WyWrongName wwn) throws Exception;// 将小区命名错误置为废弃
 
-	Map<String, WyWrongName> getWwns() throws Exception; // 获取错误小区命名小区
+	Map<String, WyWrongName> getWwns(int netType) throws Exception; // 获取错误小区命名小区
 
 	Map<String,Country> getCountrys() throws Exception;// 获取区县
 
@@ -74,7 +74,7 @@ public interface BtsDao {
 	
 	int updateWyBtsSpecialByDelFlag(WyBtsSpecial wyBtsSpecial)throws Exception;//删除特殊站点表
 	
-	Map<String,WyBtsSpecial> getBtsSpecial()throws Exception;//获取特殊站点
+	Map<String,WyBtsSpecial> getBtsSpecial(int netType)throws Exception;//获取特殊站点
 	
 
 }

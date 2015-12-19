@@ -84,7 +84,7 @@
 	<bean
 		class="org.springframework.aop.framework.autoproxy.BeanNameAutoProxyCreator">
 		<property name="beanNames">
-			<value>*Dao</value>
+			<value>*Service</value>
 		</property>
 		<property name="interceptorNames">
 			<value>transactionInterceptor</value>
@@ -113,6 +113,12 @@
 	<bean id="lteDao" class="com.sctt.net.bts.dao.impl.LteDaoImpl">
 		<property name="jdbcTemplate">
 			<ref bean="jdbcTemplate" />
+		</property>
+	</bean>
+	
+	<bean id="bizService" class="com.sctt.net.bts.service.impl.BizServiceImpl">
+		<property name="btsDao">
+			<ref bean="btsDao" />
 		</property>
 	</bean>
 	

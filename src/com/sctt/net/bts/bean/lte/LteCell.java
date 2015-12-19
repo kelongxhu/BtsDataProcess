@@ -5,11 +5,6 @@ public class LteCell {
 	private String name;
 	private Integer cityId;
 	private Integer countryId;
-	private Integer omcId;
-	private Integer celId;
-	private Integer celIdLocal;
-	private Integer eci;
-	private Integer pci;
 	private Integer vendorName;
 	private String isIndoor;
 	private String isRru;
@@ -17,10 +12,12 @@ public class LteCell {
 	private Integer isOr;
 	private Integer isRr;
 	private Integer isSr;
+	private String siteTogether;
 	private Long letIntId;
 	private Long enbIntId;
 	private Integer hightrainFlag;
 	private Integer redlineFlag;
+	private Integer deleteFlag;
 	public Long getIntId() {
 		return intId;
 	}
@@ -44,36 +41,6 @@ public class LteCell {
 	}
 	public void setCountryId(Integer countryId) {
 		this.countryId = countryId;
-	}
-	public Integer getOmcId() {
-		return omcId;
-	}
-	public void setOmcId(Integer omcId) {
-		this.omcId = omcId;
-	}
-	public Integer getCelId() {
-		return celId;
-	}
-	public void setCelId(Integer celId) {
-		this.celId = celId;
-	}
-	public Integer getCelIdLocal() {
-		return celIdLocal;
-	}
-	public void setCelIdLocal(Integer celIdLocal) {
-		this.celIdLocal = celIdLocal;
-	}
-	public Integer getEci() {
-		return eci;
-	}
-	public void setEci(Integer eci) {
-		this.eci = eci;
-	}
-	public Integer getPci() {
-		return pci;
-	}
-	public void setPci(Integer pci) {
-		this.pci = pci;
 	}
 	public Integer getVendorName() {
 		return vendorName;
@@ -141,6 +108,21 @@ public class LteCell {
 	public void setRedlineFlag(Integer redlineFlag) {
 		this.redlineFlag = redlineFlag;
 	}
+	public String getSiteTogether() {
+		return siteTogether;
+	}
+	public void setSiteTogether(String siteTogether) {
+		this.siteTogether = siteTogether;
+	}
+	public Integer getDeleteFlag() {
+		return deleteFlag;
+	}
+	public void setDeleteFlag(Integer deleteFlag) {
+		this.deleteFlag = deleteFlag;
+	}
+	
+	
+	
 	
 	
 }

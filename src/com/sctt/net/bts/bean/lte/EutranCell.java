@@ -24,13 +24,12 @@ public class EutranCell {
 	private int isOr;// 光纤直放站个数
 	private int isRR;// 无线直放站个数
 	private int isSR;// 移频直放站个数
-	private long wyBtsIntId;// 物理站点INT_ID
+	private long wyLteIntId;// 物理站点INT_ID
 	private String serviceLevel;// 维护等级
 	//2014-10-5增加
 	private String highTrainFlag;//高铁覆盖标识
 	private Integer redLineFlag;//1=红线内，2=红线外
 	private int deleteFlag;
-	private int sourceCityId;
 	private boolean isSpecial;//是否特殊站点
     private String siteTogether;
 	public Long getIntId() {
@@ -124,12 +123,7 @@ public class EutranCell {
 	public void setIsSR(int isSR) {
 		this.isSR = isSR;
 	}
-	public long getWyBtsIntId() {
-		return wyBtsIntId;
-	}
-	public void setWyBtsIntId(long wyBtsIntId) {
-		this.wyBtsIntId = wyBtsIntId;
-	}
+
 	public String getServiceLevel() {
 		return serviceLevel;
 	}
@@ -154,12 +148,6 @@ public class EutranCell {
 	public void setDeleteFlag(int deleteFlag) {
 		this.deleteFlag = deleteFlag;
 	}
-	public int getSourceCityId() {
-		return sourceCityId;
-	}
-	public void setSourceCityId(int sourceCityId) {
-		this.sourceCityId = sourceCityId;
-	}
 	public boolean isSpecial() {
 		return isSpecial;
 	}
@@ -179,5 +167,28 @@ public class EutranCell {
 	public void setRelatedEnbIntId(Long relatedEnbIntId) {
 		this.relatedEnbIntId = relatedEnbIntId;
 	}
+	public long getWyLteIntId() {
+		return wyLteIntId;
+	}
+	public void setWyLteIntId(long wyLteIntId) {
+		this.wyLteIntId = wyLteIntId;
+	}
+	@Override
+	public String toString() {
+		return "EutranCell [intId=" + intId + ", relateEnbUserLabel="
+				+ relateEnbUserLabel + ", userLabel=" + userLabel
+				+ ", vendorName=" + vendorName + ", relatedEnbIntId="
+				+ relatedEnbIntId + ", judgeMsg=" + judgeMsg + ", cityId="
+				+ cityId + ", countryId=" + countryId
+				+ ", circuitRoomOwnership=" + circuitRoomOwnership
+				+ ", transOwnership=" + transOwnership + ", isIndoor="
+				+ isIndoor + ", isRru=" + isRru + ", isGf=" + isGf + ", isOr="
+				+ isOr + ", isRR=" + isRR + ", isSR=" + isSR + ", wyLteIntId="
+				+ wyLteIntId + ", serviceLevel=" + serviceLevel
+				+ ", highTrainFlag=" + highTrainFlag + ", redLineFlag="
+				+ redLineFlag + ", deleteFlag=" + deleteFlag + ", isSpecial="
+				+ isSpecial + ", siteTogether=" + siteTogether + "]";
+	}
+	
 	
 }

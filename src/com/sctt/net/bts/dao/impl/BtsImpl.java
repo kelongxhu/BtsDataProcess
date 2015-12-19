@@ -153,12 +153,12 @@ public class BtsImpl implements BtsDao {
 	 * 插入错误小区名称
 	 */
 	public int insertWyWrongName(WyWrongName wwn) throws Exception {
-		String sql = "INSERT INTO WY_WRONGNAME(INT_ID,CELL_NAME,BSC_NAME,BTS_ID,BTSNAME,TYPE,CITY_ID)VALUES(?,?,?,?,?,?,?)";
+		String sql = "INSERT INTO WY_WRONGNAME(INT_ID,CELL_NAME,BSC_NAME,BTS_ID,BTSNAME,TYPE,CITY_ID,NET_TYPE)VALUES(?,?,?,?,?,?,?,?)";
 		Object[] params = new Object[] { wwn.getInt_id(), wwn.getCellName(),
 				wwn.getBscName(), wwn.getBtsId(), wwn.getBtsName(),
-				wwn.getType(), wwn.getCityId() };
+				wwn.getType(), wwn.getCityId(),wwn.getNetType() };
 		int[] types = new int[] { Types.BIGINT, Types.VARCHAR, Types.VARCHAR,
-				Types.BIGINT, Types.VARCHAR, Types.INTEGER, Types.INTEGER };
+				Types.BIGINT, Types.VARCHAR, Types.INTEGER, Types.INTEGER,Types.INTEGER };
 		return jdbcTemplate.update(sql, params, types);
 	}
 
@@ -166,12 +166,12 @@ public class BtsImpl implements BtsDao {
 	 * 更新错误小区名称
 	 */
 	public int updateWyWrongName(WyWrongName wwn) throws Exception {
-		String sql = "update WY_WRONGNAME set CELL_NAME=?,BSC_NAME=?,BTS_ID=?,BTSNAME=?,TYPE=?,UPDATETIME=sysdate,DELETE_FLAG=?,CITY_ID=? where INT_ID=?";
+		String sql = "update WY_WRONGNAME set CELL_NAME=?,BSC_NAME=?,BTS_ID=?,BTSNAME=?,TYPE=?,UPDATETIME=sysdate,DELETE_FLAG=?,CITY_ID=?,NET_TYPE=? where INT_ID=?";
 		Object[] params = new Object[] { wwn.getCellName(), wwn.getBscName(),
 				wwn.getBtsId(), wwn.getBtsName(), wwn.getType(),
-				wwn.getDeleteFlag(), wwn.getCityId(), wwn.getInt_id() };
+				wwn.getDeleteFlag(), wwn.getCityId(), wwn.getNetType(),wwn.getInt_id() };
 		int[] types = new int[] { Types.VARCHAR, Types.VARCHAR, Types.BIGINT,
-				Types.VARCHAR, Types.BIGINT, Types.BIGINT, Types.BIGINT,
+				Types.VARCHAR, Types.INTEGER, Types.INTEGER, Types.INTEGER,Types.INTEGER,
 				Types.BIGINT };
 		return jdbcTemplate.update(sql, params, types);
 	}
@@ -189,9 +189,11 @@ public class BtsImpl implements BtsDao {
 	/**
 	 * 加载名称错误小区
 	 */
-	public Map<String, WyWrongName> getWwns() throws Exception {
-		String sql = "select INT_ID,CELL_NAME,DELETE_FLAG from WY_WRONGNAME";
-		List list = jdbcTemplate.queryForList(sql);
+	public Map<String, WyWrongName> getWwns(int netType) throws Exception {
+		String sql = "select INT_ID,CELL_NAME,DELETE_FLAG from WY_WRONGNAME where NET_TYPE=?";
+		Object[] params = new Object[] { netType };
+		int[] types = new int[] { Types.INTEGER };
+		List list = jdbcTemplate.queryForList(sql,params,types);
 		Map<String, WyWrongName> wwnMap = new HashMap<String, WyWrongName>();
 		for (int i = 0; i < list.size(); i++) {
 			Map map = (Map) list.get(i);
@@ -571,9 +573,11 @@ public class BtsImpl implements BtsDao {
 	}
 
 	@Override
-	public Map<String, WyBtsSpecial> getBtsSpecial() throws Exception {
-		String sql = "select INT_ID,NAME,DELETE_FLAG from WY_BTS_SPECIAL where NET_TYPE=1";
-		List list = jdbcTemplate.queryForList(sql);
+	public Map<String, WyBtsSpecial> getBtsSpecial(int netType) throws Exception {
+		String sql = "select INT_ID,NAME,DELETE_FLAG from WY_BTS_SPECIAL where NET_TYPE=?";
+		Object[] params = new Object[] { netType };
+		int[] types = new int[] { Types.INTEGER };
+		List list = jdbcTemplate.queryForList(sql, params, types);
 		Map<String, WyBtsSpecial> specialMap = new HashMap<String, WyBtsSpecial>();
 		for (int i = 0; i < list.size(); i++) {
 			Map map = (Map) list.get(i);

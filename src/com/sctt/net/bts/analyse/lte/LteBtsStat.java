@@ -70,7 +70,7 @@ public class LteBtsStat {
 				noIndoorMap.put(name, site);
 			}
 		}
-		cell.setWyBtsIntId(lteBts.getIntId());
+		cell.setWyLteIntId(lteBts.getIntId());
 		cell.setDeleteFlag(0);// 再用小区
 		cellMap.put(cell.getIntId() + "", cell);
 	}

@@ -1,18 +1,22 @@
 package com.sctt.net.bts.analyse.lte;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
 
 import com.sctt.net.bts.bean.cdma.Country;
+import com.sctt.net.bts.bean.cdma.WyBtsSpecial;
+import com.sctt.net.bts.bean.cdma.WyWrongName;
+import com.sctt.net.bts.bean.lte.Enodeb;
 import com.sctt.net.bts.bean.lte.EutranCell;
+import com.sctt.net.bts.bean.lte.LteBbu;
 import com.sctt.net.bts.bean.lte.LteBts;
 import com.sctt.net.bts.dao.BtsDao;
 import com.sctt.net.bts.dao.LteDao;
+import com.sctt.net.bts.service.BizService;
 import com.sctt.net.common.util.AnalyseUtil;
+import com.sctt.net.common.util.Constants;
 import com.sctt.net.common.util.StringUtils;
 import com.sctt.net.common.util.WrongMsg;
 
@@ -26,20 +30,33 @@ public class LteBtsAnalyse implements Runnable {
 	private static Logger logger = Logger.getLogger("baseLog");
 	private BtsDao btsDao;
 	private LteDao lteDao;
+	private BizService bizService;
 	
-	public LteBtsAnalyse(BtsDao btsDao,LteDao lteDao){
+	public LteBtsAnalyse(BtsDao btsDao,LteDao lteDao,BizService bizService){
 		this.btsDao=btsDao;
 		this.lteDao=lteDao;
+		this.bizService=bizService;
 	}
 	public void run() {
 		logger.info("LTE站点分析开始.....");
 		try {
 			LteBtsStat stat=new LteBtsStat();
 			List<EutranCell> cells=lteDao.selectEutranCell();
+			List<Enodeb> bbus=lteDao.selectEnodeb();//bbu列表
 			Map<String,Country> countryMap = btsDao.getCountrys();
-			List<LteBts> dbLteBts=lteDao.selectLteBts();
+			Map<String,LteBts> yesLteBtsMap=lteDao.selectLteBts();
+			Map<String,EutranCell> yesLteCellMap=lteDao.selectLteCell();
+			Map<String, LteBts> noIndoorMap = null;// 非室分Map,bbu查找共站物理站点用
+			Map<String,LteBbu> yesBbuMap=lteDao.selectLteBbu();//wy_lte_bbu数据
+			Map<String,WyWrongName> yesWwnMap = btsDao.getWwns(Constants.LTE);
+			Map<String, WyBtsSpecial> btsSpecialMap=btsDao.getBtsSpecial(Constants.LTE);
 			logger.info("从tco_pro_eutrancell_m采集到小区数据:"+cells.size());
-			logger.info("從wy_lte_bts采集到数据:"+dbLteBts.size());
+			logger.info("从tco_pro_enodeb_m采集到bbu数:"+bbus.size());
+			logger.info("從wy_lte_bts采集到数据:"+yesLteBtsMap.size());
+			logger.info("从wy_lte_cell采集到数据:"+yesLteCellMap.size());
+			logger.info("从wy_lte_bbu采集到的数据:"+yesBbuMap.size());
+			logger.info("从wy_wrongName采集到LTE错误命名:"+yesWwnMap.size());
+			logger.info("从wy_speacail采集到LTE特殊站点命名:"+btsSpecialMap.size());
 			//解析
 			for(EutranCell cell:cells){
 				if (AnalyseUtil.ignoreCell(cell.getUserLabel())) {
@@ -61,8 +78,39 @@ public class LteBtsAnalyse implements Runnable {
 			}
 			//解析完成
 			Map<String,LteBts> lteBtsMap=stat.getLteBtsMap();
-			insertLteBts(lteBtsMap,dbLteBts);
+			Map<String,EutranCell> cellMap=stat.getCellMap();
+			insertLteBts(lteBtsMap,yesLteBtsMap);
+			incrUpdateCell(cellMap,yesLteCellMap);
 			logger.info("解析到LTE站点数:"+lteBtsMap.size());
+			logger.info("解析到LTE小区数:"+cellMap.size());
+			logger.info("解析LTE的BBU开始...");
+			LteBbuStat bbuStat=new LteBbuStat();
+			noIndoorMap=stat.getNoIndoorMap();
+			for (Enodeb bbu : bbus) {
+				Enodeb judgeBbu = ruleLteBbu(bbu, noIndoorMap, countryMap);
+				String bbuJudgeMsg=judgeBbu.getJudgeMsg();
+				if (StringUtils.isEmpty(bbuJudgeMsg)) {
+					bbuStat.bbuStat(judgeBbu);
+					//统计特殊站点
+					boolean specialFlag=judgeBbu.isSpecial();
+					if(specialFlag){
+						stat.addSpecialBts(judgeBbu);
+					}
+				} else {
+					// 错误命名BBU
+					stat.addWrongBbu(bbu);
+				}
+				
+			}
+			bbuStat.finishBbuStat();
+			Map<String,LteBbu> bbuMap=bbuStat.getBbuMap();
+			Map<String,WyWrongName> wwNMap=stat.getWrongMap();
+			Map<String,WyBtsSpecial> specialMap=stat.getBtsSpecialMap();
+			incrUpdateBbu(bbuMap,yesBbuMap);
+			bizService.wwnUpdate(wwNMap, yesWwnMap);
+			bizService.specialBtsUpdate(specialMap,btsSpecialMap);
+			logger.info("解析LTE的BBU数:"+bbuMap.size());
+			logger.info("解析LTE的BBU结束...");
 		} catch (Exception e) {
 			logger.error(e.getMessage(),e);
 		}
@@ -73,35 +121,113 @@ public class LteBtsAnalyse implements Runnable {
 	 * @param lteBtsMap
 	 * @param dbLteBts
 	 */
-	public void insertLteBts(Map<String,LteBts> lteBtsMap,List<LteBts> dbLteBts){
+	public void insertLteBts(Map<String,LteBts> lteBtsMap,Map<String,LteBts> yesBtsMap){
+		int i = 0;
+		int j = 0;
+		int q = 0;
 		try {
-			List<LteBts> lteBtsList = new ArrayList();
-			lteBtsList.addAll(lteBtsMap.values());
-			List<LteBts> temp = lteBtsList;
-			//新增的
-			lteBtsList.removeAll(dbLteBts);
-			//更新的
-			temp.containsAll(dbLteBts);
-			//删除的
-			dbLteBts.removeAll(lteBtsMap.values());
-			List<LteBts> deleteList = new ArrayList();
-			for (LteBts bts : dbLteBts) {
-				if (bts.getDeleteFlag() == 0) {
-					deleteList.add(bts);
+			logger.info("++++小区增量分析中...");
+			for (String keyObj : lteBtsMap.keySet()) {
+				LteBts bts = yesBtsMap.get(keyObj);
+				LteBts updateBts = lteBtsMap.get(keyObj);
+				if (bts != null) {
+					// 更新
+					i+= lteDao.updateLteBts(updateBts);
+				} else {
+					// 新增
+					j+=lteDao.insertLteBts(updateBts);
 				}
 			}
-			List<LteBts> lte=new ArrayList();
-			lte.add(lteBtsList.get(1));
-			int insertCount=lteDao.insertLteBts(lte);
-			int updateCount=lteDao.updateLteBts(temp);
-			int deleteCount=lteDao.deleteLteBts(deleteList);
-			logger.info("wy_lte_bts的基站数据新增:"+insertCount+",更新数量:"+updateCount+",删除数量:"+deleteCount);
+
+			for (String keyObj : yesBtsMap.keySet()) {
+				LteBts bts = lteBtsMap.get(keyObj);
+				LteBts updateBts = yesBtsMap.get(keyObj);
+				if (bts == null) {
+					// 废弃
+					int deleteFlag = updateBts.getDeleteFlag();
+					if (deleteFlag == 0) {
+						q+=lteDao.updateLteBtsByDeleteFlag(updateBts);
+					}
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			logger.error(e.getMessage(), e);
+		}
+		logger.info("wy_lte_bts基站增量结果：更新：" + i + ";新增：" + j + ";废弃：" + q);
+	}
+	
+	public void incrUpdateCell(Map<String, EutranCell> cellMap,
+			Map<String, EutranCell> yesCellMap) {
+		int i = 0;
+		int j = 0;
+		int q = 0;
+		try {
+			logger.info("++++小区增量分析中...");
+			for (String keyObj : cellMap.keySet()) {
+				EutranCell cell = yesCellMap.get(keyObj);
+				EutranCell updateCell = cellMap.get(keyObj);
+				if (cell != null) {
+					// 更新
+					i+=lteDao.updateLteCell(updateCell);
+				} else {
+					// 新增
+					j+=lteDao.insertLteCell(updateCell);
+				}
+			}
+
+			for (String keyObj : yesCellMap.keySet()) {
+				EutranCell cell = cellMap.get(keyObj);
+				EutranCell updateCell = yesCellMap.get(keyObj);
+				if (cell == null) {
+					// 废弃
+					int deleteFlag = updateCell.getDeleteFlag();
+					if (deleteFlag == 0) {
+						q+=lteDao.updateLteCellByDeleteFlag(updateCell);
+					}
+				}
+			}
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
 		}
-	     
+		logger.info("wy_lte_cell小区增量结果：更新：" + i + ";新增：" + j + ";废弃：" + q);
 	}
 	
+	public void incrUpdateBbu(Map<String, LteBbu> bbuMap,
+			Map<String, LteBbu> yesBbuMap) {
+		int i = 0;
+		int j = 0;
+		int q = 0;
+		try {
+			logger.info("++++Lte BBU增量分析中...");
+			for (String keyObj : bbuMap.keySet()) {
+				LteBbu bbu = yesBbuMap.get(keyObj);
+				LteBbu updateBbu = bbuMap.get(keyObj);
+				if (bbu != null) {
+					// 更新
+					i+=lteDao.updateLteBbu(updateBbu);
+				} else {
+					// 新增
+					j+=lteDao.insertLteBbu(updateBbu);
+				}
+			}
+
+			for (String keyObj : yesBbuMap.keySet()) {
+				LteBbu bbu = bbuMap.get(keyObj);
+				LteBbu updateBbu = yesBbuMap.get(keyObj);
+				if (bbu == null) {
+					// 废弃
+					int deleteFlag = updateBbu.getDeleteFlag();
+					if (deleteFlag == 0) {
+						q+=lteDao.updateLteBbuByDeleteFlag(updateBbu);
+					}
+				}
+			}
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+		}
+		logger.info("wy_lte_bbu表增量结果：更新：" + i + ";新增：" + j + ";废弃：" + q);
+	}
 	/**
 	 * 小区命名规则判断
 	 * 
@@ -168,7 +294,13 @@ public class LteBtsAnalyse implements Runnable {
 			}else{
 				cell.setIsIndoor("否");
 			}
-			// cqFlag:基站产权标识
+			// cqFlag:基站产权标识, 传输产权，维护等级必选项
+			if(cqFlag+2<cellLength){
+				//缺失字段
+				cell.setJudgeMsg(WrongMsg.MISS.getWrongMsg());
+				return cell;
+			}
+			
 			if (!AnalyseUtil.isRight(splitName[cqFlag])) {
 				cell.setJudgeMsg(WrongMsg.OWNER_RIGHT.getWrongMsg());
 				return cell;
@@ -263,14 +395,114 @@ public class LteBtsAnalyse implements Runnable {
 			}
 
 		} catch (Exception e) {
-			logger.info(cell.getUserLabel() + ":" + e.getMessage(), e);
-			cell.setJudgeMsg(WrongMsg.MISS.getWrongMsg());
+			cell.setJudgeMsg(WrongMsg.ERROR.getWrongMsg());
+			logger.error(e.getMessage(),e);
 			return cell;// 解析异常，不规则小区
 		}
 
 		return cell;
 	}
 
+	
+	/**
+	 * 验证规则BBU
+	 * 
+	 * @param bts
+	 * @return
+	 */
+	public Enodeb ruleLteBbu(Enodeb bts, Map<String, LteBts> noIndoorMap,
+			Map<String, Country> countryMap) {
+		try {
+			// 增加高铁标识,沿河思渠接入网_BBU1_GGH_电_电
+			//纯BBU,乌当行政中心_BBU1_电_电
+			//共站bbu，乌当行政中心_BBU3_共站
+			String btsName = bts.getUserLabel();
+			String specialName=btsName.substring(btsName.length()-2);
+			boolean specialFlag=AnalyseUtil.isSpecical(specialName);
+			bts.setSpecial(specialFlag);
+			if(specialFlag){
+				btsName=btsName.substring(0, btsName.length()-2);
+			}
+			String[] array = btsName.split("_");
+			int length = array.length;
+			if (!(length > 2 && length < 6)) {
+				bts.setJudgeMsg(WrongMsg.MISS.getWrongMsg());
+				return bts;
+			}
+			String name = array[0];
+			// 名称的前三字符找不到所属地市的依旧为错误命名
+			Country country = AnalyseUtil.getCountry(countryMap, name);
+			if (country != null) {
+				bts.setCityId(country.getCityId());
+				bts.setCountryId(country.getId());
+			} else {
+				// 不符合规则命名
+				bts.setJudgeMsg(WrongMsg.CITY.getWrongMsg());
+				return bts;
+			}
+			// 是否高铁标识
+			boolean highFlag = AnalyseUtil.isHighBts(array[2]);
+			if (highFlag) {
+				bts.setHighTrainFlag(array[2]);
+				String redLine = array[2].substring(array[2].length() - 1);
+				if ("H".equals(redLine)) {
+					bts.setRedLineFlag(1);// 红线内
+				} else {
+					bts.setRedLineFlag(2);// 红线外
+				}
+			}
+			//判断第二位，array[1]规则，BBU+NUM
+			String bbuFlag=array[1];
+			if(!bbuFlag.contains("BBU")||bbuFlag.length()<4){
+				bts.setJudgeMsg(WrongMsg.BBU_FLAG_ERROR.getWrongMsg());
+				return bts;
+			}
+			if ("BBU1".equals(bbuFlag)) {
+				if (btsName.contains("共站")) {
+					// BBU1包含共站，物理站点中能找到相同名称站点
+					LteBts btsSite = noIndoorMap.get(name);
+					if (btsSite == null) {
+						bts.setJudgeMsg(WrongMsg.BBU_BTS_NOTEXIST.getWrongMsg());
+						return bts;
+					} else {
+						bts.setRelatedWyLteBtsId(btsSite.getIntId());
+					}
+				} else {
+					// BBU1不含共站，包含机房产权和传输产权
+					String circuitRoomOwnership = "";
+					String transOwnership = "";
+					if (highFlag) {
+						circuitRoomOwnership = array[3];
+						transOwnership = array[4];
+					} else {
+						circuitRoomOwnership = array[2];
+						transOwnership = array[3];
+					}
+					if (!AnalyseUtil.isRight(circuitRoomOwnership)){
+						bts.setJudgeMsg(WrongMsg.OWNER_RIGHT.getWrongMsg());
+						return bts;
+					}
+					if (!AnalyseUtil.isRight(transOwnership)){
+						bts.setJudgeMsg(WrongMsg.TRANS_RIGHT.getWrongMsg());
+						return bts;
+					}
+					bts.setCircuitRoomOwnership(circuitRoomOwnership);
+					bts.setTransOwnership(transOwnership);
+				}
+			} else {
+				// 如果BBU2以后一定得有共站
+				if (!array[2].equals("共站")) {
+					bts.setJudgeMsg(WrongMsg.BBU_BHGZ.getWrongMsg());
+					return bts;
+				}
+			}
+		} catch (Exception e) {
+			bts.setJudgeMsg(WrongMsg.ERROR.getWrongMsg());
+			logger.error("" + e.getMessage(), e);
+			return bts;// 解析异常
+		}
+		return bts;
+	}
 
 	
 

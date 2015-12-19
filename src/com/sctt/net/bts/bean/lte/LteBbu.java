@@ -3,7 +3,9 @@ package com.sctt.net.bts.bean.lte;
 public class LteBbu {
 	private Long intId;
 	private String name;
-	private Integer bbuNo;
+	private String bbuNo;// BBU编号
+	private Integer enbId;//ENBID
+	private Long relateEnbBtsId;
 	private String enbBtsName;
 	private String circuitRoomOwnership;
 	private String transOwnership;
@@ -12,9 +14,10 @@ public class LteBbu {
 	private Integer countryId;
 	private Integer isShare;
 	private Integer buuType;
-	private Long lteBtsId;
-	private Integer hightranFlag;
+	private Long WyLteBtsId;   //关联的物理站点
+	private String hightranFlag;
 	private Integer redlineFlag;
+	private Integer deleteFlag;//删除标识
 	public Long getIntId() {
 		return intId;
 	}
@@ -27,11 +30,24 @@ public class LteBbu {
 	public void setName(String name) {
 		this.name = name;
 	}
-	public Integer getBbuNo() {
+	public String getBbuNo() {
 		return bbuNo;
 	}
-	public void setBbuNo(Integer bbuNo) {
+	public void setBbuNo(String bbuNo) {
 		this.bbuNo = bbuNo;
+	}
+	
+	public Integer getEnbId() {
+		return enbId;
+	}
+	public void setEnbId(Integer enbId) {
+		this.enbId = enbId;
+	}
+	public Long getRelateEnbBtsId() {
+		return relateEnbBtsId;
+	}
+	public void setRelateEnbBtsId(Long relateEnbBtsId) {
+		this.relateEnbBtsId = relateEnbBtsId;
 	}
 	public String getEnbBtsName() {
 		return enbBtsName;
@@ -81,16 +97,18 @@ public class LteBbu {
 	public void setBuuType(Integer buuType) {
 		this.buuType = buuType;
 	}
-	public Long getLteBtsId() {
-		return lteBtsId;
+	
+	public Long getWyLteBtsId() {
+		return WyLteBtsId;
 	}
-	public void setLteBtsId(Long lteBtsId) {
-		this.lteBtsId = lteBtsId;
+	public void setWyLteBtsId(Long wyLteBtsId) {
+		WyLteBtsId = wyLteBtsId;
 	}
-	public Integer getHightranFlag() {
+	
+	public String getHightranFlag() {
 		return hightranFlag;
 	}
-	public void setHightranFlag(Integer hightranFlag) {
+	public void setHightranFlag(String hightranFlag) {
 		this.hightranFlag = hightranFlag;
 	}
 	public Integer getRedlineFlag() {
@@ -98,6 +116,12 @@ public class LteBbu {
 	}
 	public void setRedlineFlag(Integer redlineFlag) {
 		this.redlineFlag = redlineFlag;
+	}
+	public Integer getDeleteFlag() {
+		return deleteFlag;
+	}
+	public void setDeleteFlag(Integer deleteFlag) {
+		this.deleteFlag = deleteFlag;
 	}
 	
 	

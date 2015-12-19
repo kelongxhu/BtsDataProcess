@@ -16,6 +16,7 @@ import com.sctt.net.bts.analyse.cdma.InitInstance;
 import com.sctt.net.bts.analyse.lte.LteBtsAnalyse;
 import com.sctt.net.bts.dao.BtsDao;
 import com.sctt.net.bts.dao.LteDao;
+import com.sctt.net.bts.service.BizService;
 import com.sctt.net.common.util.BaseConstants;
 import com.sctt.net.common.util.DateHelper;
 
@@ -26,6 +27,8 @@ public class Main {
 	private static BtsDao btsDao = null;
 	
 	private static LteDao lteDao=null;
+	
+	private static BizService bizSerivce=null;
 
 	private static BaseConstants baseConstants;
 
@@ -36,6 +39,7 @@ public class Main {
 			BeanFactory factory = new XmlBeanFactory(resource);
 			btsDao = (BtsDao) factory.getBean("btsDao");
 			lteDao=(LteDao)factory.getBean("lteDao");
+			bizSerivce=(BizService)factory.getBean("bizService");
 			baseConstants = (BaseConstants) factory.getBean("baseConstants");
 			InitInstance.getInstance().initCityMap();
 			log.info("++++完成初始化程序");
@@ -54,9 +58,9 @@ public class Main {
 		ScheduledExecutorService execService = Executors
 				.newScheduledThreadPool(10);
 
-		BtsAnalyse btsAnalyse = new BtsAnalyse(btsDao);
+		BtsAnalyse btsAnalyse = new BtsAnalyse(btsDao,bizSerivce);
 
-		LteBtsAnalyse lteAnalyse=new LteBtsAnalyse(btsDao,lteDao);
+		LteBtsAnalyse lteAnalyse=new LteBtsAnalyse(btsDao,lteDao,bizSerivce);
 		// 每天晚上12点执行一次
 		int flag = baseConstants.getFlag();
 
