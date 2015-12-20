@@ -42,6 +42,7 @@ public class Main {
 			bizSerivce=(BizService)factory.getBean("bizService");
 			baseConstants = (BaseConstants) factory.getBean("baseConstants");
 			InitInstance.getInstance().initCityMap();
+			InitInstance.getInstance().initLteCityMap();
 			log.info("++++完成初始化程序");
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
@@ -72,8 +73,8 @@ public class Main {
 
 		log.info("++++按天执行解析物理站点,首次延迟时间秒数:" + seconds);
 
-//		execService.scheduleAtFixedRate(btsAnalyse, seconds, 86400,
-//				TimeUnit.SECONDS);
+		execService.scheduleAtFixedRate(btsAnalyse, seconds, 86400,
+				TimeUnit.SECONDS);
 
         execService.scheduleAtFixedRate(lteAnalyse, seconds, 86400, TimeUnit.SECONDS);
 

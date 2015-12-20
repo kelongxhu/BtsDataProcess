@@ -20,6 +20,7 @@ import com.sctt.net.bts.service.BizService;
 import com.sctt.net.common.util.AnalyseUtil;
 import com.sctt.net.common.util.Constants;
 import com.sctt.net.common.util.StringUtils;
+import com.sctt.net.common.util.WrongMsg;
 
 /**
  * 基站分析任务，每天分析一次
@@ -34,9 +35,9 @@ public class BtsAnalyse implements Runnable {
 	private BtsDao btsDao;
 	private BizService bizService;
 
-	public BtsAnalyse(BtsDao btsDao,BizService bizService) {
+	public BtsAnalyse(BtsDao btsDao, BizService bizService) {
 		this.btsDao = btsDao;
-		this.bizService=bizService;
+		this.bizService = bizService;
 	}
 
 	public void run() {
@@ -49,7 +50,7 @@ public class BtsAnalyse implements Runnable {
 		Map<String, Country> countryMap = null;
 		Map<String, TunelSite> yesTunelMap = null;// wy_tunel的数据
 		Map<String, TunelLib> yesTunelLibMap = null;// wy_lib_tunel的数据
-		Map<String, WyBtsSpecial> yesSpecialMap=null;//WY_BTS_SPECIAL数据
+		Map<String, WyBtsSpecial> yesSpecialMap = null;// WY_BTS_SPECIAL数据
 		// 分析后覆盖站点Map
 		Map<String, BtsSite> btssiteMap = null;
 		// 分析后的隧道Map
@@ -62,7 +63,7 @@ public class BtsAnalyse implements Runnable {
 		Map<String, WyBbu> yesBbuMap = null;
 		Map<String, BtsSite> noIndoorMap = null;// 非室分Map,bbu查找共站物理站点用
 		Map<String, TunelLib> tunelLibMap = null;
-		Map<String, WyBtsSpecial> btsSpecialMap=null;
+		Map<String, WyBtsSpecial> btsSpecialMap = null;
 
 		try {
 			logger.info("++++分析物理站点开始:");
@@ -73,14 +74,14 @@ public class BtsAnalyse implements Runnable {
 			yesCellMap = btsDao.getWyCell();
 			yesTunelMap = btsDao.getTunels();
 			yesTunelLibMap = btsDao.getTunelLib();
-			yesSpecialMap=btsDao.getBtsSpecial(Constants.CDMA);
+			yesSpecialMap = btsDao.getBtsSpecial(Constants.CDMA);
 			logger.info("从网管c_cell采集到小区数据：" + cells.size());
 			logger.info("wy_bts采集到物理站点数据:" + yesMap.size());
 			logger.info("wy_wrongname采集到原有错误小区数据：" + yesWwnMap.size());
 			logger.info("wy_cell采集到小区数：" + yesCellMap.size());
 			logger.info("wy_tunel采集到隧道站点数据:" + yesTunelMap.size());
 			logger.info("wy_tunel_lib采集到解析的隧道库数量:" + yesTunelLibMap.size());
-			logger.info("wy_bts_special采集到解析的特殊状态站点数量:"+yesSpecialMap.size());
+			logger.info("wy_bts_special采集到解析的特殊状态站点数量:" + yesSpecialMap.size());
 			for (Cell cell : cells) {
 				if (AnalyseUtil.ignoreCell(cell.getName())) {
 					continue;// 忽略小区
@@ -96,8 +97,8 @@ public class BtsAnalyse implements Runnable {
 						// 统计室内、室外
 						stat.btsStat(ruleCell, countryMap);
 					}
-					boolean specailFlag=ruleCell.isSpecial();
-					if(specailFlag){
+					boolean specailFlag = ruleCell.isSpecial();
+					if (specailFlag) {
 						stat.addSpecialCell(ruleCell);
 					}
 				} else {
@@ -139,28 +140,28 @@ public class BtsAnalyse implements Runnable {
 				Bts ruleBbu = ruleBbu(bbu, noIndoorMap, countryMap);
 				if (ruleBbu != null) {
 					bbuStat.bbuStat(ruleBbu);
-					//统计特殊站点
-					boolean specialFlag=ruleBbu.isSpecial();
-					if(specialFlag){
+					// 统计特殊站点
+					boolean specialFlag = ruleBbu.isSpecial();
+					if (specialFlag) {
 						stat.addSpecialBts(ruleBbu);
 					}
 				} else {
 					// 错误命名BBU
 					stat.addWrongBbu(bbu);
 				}
-				
+
 			}
 			bbuStat.finishBbuStat();
 			Map<String, WyBbu> bbuMap = bbuStat.getBbuMap();
 			Map<String, WyWrongName> wrongMap = stat.getWrongMap();
-			Map<String,WyBtsSpecial> specialMap=stat.getBtsSpecialMap();
+			Map<String, WyBtsSpecial> specialMap = stat.getBtsSpecialMap();
 			logger.info("解析到BBU数量:" + bbuMap.size());
 			logger.info("解析到错误命名小区、BBU数量：" + wrongMap.size());
-			logger.info("解析到特殊状态站点数量:"+specialMap.size());
+			logger.info("解析到特殊状态站点数量:" + specialMap.size());
 			// 增量更新
 			bbuUpdate(bbuMap, yesBbuMap);
 			bizService.wwnUpdate(wrongMap, yesWwnMap);
-			bizService.specialBtsUpdate(specialMap,yesSpecialMap);
+			bizService.specialBtsUpdate(specialMap, yesSpecialMap);
 			logger.info("++++分析BBU结束...");
 
 		} catch (Exception e) {
@@ -426,6 +427,7 @@ public class BtsAnalyse implements Runnable {
 			logger.error(e.getMessage(), e);
 		}
 	}
+
 	/**
 	 * 小区命名规则判断
 	 * 
@@ -436,11 +438,11 @@ public class BtsAnalyse implements Runnable {
 	public Cell ruleCell(Cell cell) {
 		try {
 			String cellName = cell.getName();
-			String specialName=cellName.substring(cellName.length()-2);
-			boolean specialFlag=AnalyseUtil.isSpecical(specialName);
+			String specialName = cellName.substring(cellName.length() - 2);
+			boolean specialFlag = AnalyseUtil.isSpecical(specialName);
 			cell.setSpecial(specialFlag);
-			if(specialFlag){
-				cellName=cellName.substring(0, cellName.length()-2);
+			if (specialFlag) {
+				cellName = cellName.substring(0, cellName.length() - 2);
 			}
 			String btsName = cell.getBtsName();
 			String[] splitName = cellName.split("_");
@@ -448,13 +450,12 @@ public class BtsAnalyse implements Runnable {
 			// 必含字段：系统号_BTS序号_小区序号_市/县/区+小区名_基站产权标识_传输产权标识_维护等级
 			// 可含字段：室分_拉远_直放站标识_小区功分信息标识。
 			if (cellLength < 7) {
-				return null;
+				cell.setJudgeMsg(WrongMsg.MISS.getWrongMsg());
+				return cell;
 			}
-			
 			// 计算是否高铁覆盖
 			int cqFlag = 0;
 			boolean isHighFlag = AnalyseUtil.isHighBts(splitName[4]);
-			boolean isTunel = false;
 			String tunelStr = "";
 			if (isHighFlag) {
 				cqFlag = AnalyseUtil.getCqFlag(splitName, 5);// 产权开始标记
@@ -471,40 +472,46 @@ public class BtsAnalyse implements Runnable {
 				cqFlag = AnalyseUtil.getCqFlag(splitName, 4);
 				tunelStr = splitName[4];
 			}
-
 			// 设置隧道标识
 			if (tunelStr.contains("隧道")) {
 				cell.setTunel(true);
 			} else {
 				cell.setTunel(false);
 			}
+			// cqFlag:基站产权标识, 传输产权，维护等级必选项
+			if (cqFlag> cellLength-3) {
+				// 缺失字段
+				cell.setJudgeMsg(WrongMsg.MISS.getWrongMsg());
+				return cell;
+			}
 			// cqFlag:基站产权标识
 			if (!AnalyseUtil.isRight(splitName[cqFlag])) {
-				return null;
+				cell.setJudgeMsg(WrongMsg.OWNER_RIGHT.getWrongMsg());
+				return cell;
 			} else {
 				cell.setCircuitRoomOwnership(splitName[cqFlag]);
 			}
-
 			// cqFlag+1:传输产权标识
 			if (!AnalyseUtil.isRight(splitName[cqFlag + 1])) {
-				return null;
+				cell.setJudgeMsg(WrongMsg.TRANS_RIGHT.getWrongMsg());
+				return cell;
 			} else {
 				cell.setTransOwnership(splitName[cqFlag + 1]);
 			}
-
 			// cqFlag+2:维护等级
 			if (!AnalyseUtil.isRank(splitName[cqFlag + 2])) {
-				return null;
+				cell.setJudgeMsg(WrongMsg.RANK.getWrongMsg());
+				return cell;
 			} else {
 				cell.setServiceLevel(splitName[cqFlag + 2]);
 			}
-
 			int zfStart = cqFlag + 3;// 直放站开始标识
 			int zfEnd = 0;// 直放站结束标识
 			// 是否包含功分，是：是否最后一个字段
 			if (cellName.contains("功分")) {
 				if (!splitName[cellLength - 1].contains("功分")) {
-					return null;
+					cell.setJudgeMsg(WrongMsg.GOFEN.getWrongMsg());
+					return cell;
 				}
 				String gfValue = splitName[cellLength - 1];
 				if (gfValue.length() > 2) {
@@ -550,13 +557,15 @@ public class BtsAnalyse implements Runnable {
 					btsName = btsName_Temp[0];
 				}
 				if (!btsName.equals(splitName[3])) {
-					return null;// 错误命名
+					cell.setJudgeMsg(WrongMsg.LY.getWrongMsg());
+					return cell;// 错误命名
 				}
 			}
 
 		} catch (Exception e) {
-			logger.info(cell.getName() + ":" + e.getMessage(), e);
-			return null;// 解析异常，不规则小区
+			cell.setJudgeMsg(WrongMsg.ERROR.getWrongMsg());
+			logger.error(e.getMessage()+"====="+cell.getName(),e);
+			return cell;// 解析异常，不规则小区
 		}
 
 		return cell;
@@ -573,16 +582,17 @@ public class BtsAnalyse implements Runnable {
 		try {
 			// 增加高铁标识,沿河思渠接入网_BBU1_GGH_电_电
 			String btsName = bts.getName();
-			String specialName=btsName.substring(btsName.length()-2);
-			boolean specialFlag=AnalyseUtil.isSpecical(specialName);
+			String specialName = btsName.substring(btsName.length() - 2);
+			boolean specialFlag = AnalyseUtil.isSpecical(specialName);
 			bts.setSpecial(specialFlag);
-			if(specialFlag){
-				btsName=btsName.substring(0, btsName.length()-2);
+			if (specialFlag) {
+				btsName = btsName.substring(0, btsName.length() - 2);
 			}
 			String[] array = btsName.split("_");
 			int length = array.length;
 			if (!(length > 2 && length < 6)) {
-				return null;
+				bts.setJudgeMsg(WrongMsg.MISS.getWrongMsg());
+				return bts;
 			}
 			String name = array[0];
 
@@ -593,7 +603,8 @@ public class BtsAnalyse implements Runnable {
 				bts.setCountryId(country.getId());
 			} else {
 				// 不符合规则命名
-				return null;
+				bts.setJudgeMsg(WrongMsg.CITY.getWrongMsg());
+				return bts;
 			}
 
 			// 是否高铁标识
@@ -607,43 +618,64 @@ public class BtsAnalyse implements Runnable {
 					bts.setRedLineFlag(2);// 红线外
 				}
 			}
+			//判断第二位，array[1]规则，BBU+NUM
+			String bbuFlag=array[1];
+			if(!bbuFlag.contains("BBU")||bbuFlag.length()<4){
+				bts.setJudgeMsg(WrongMsg.BBU_FLAG_ERROR.getWrongMsg());
+				return bts;
+			}
 			String bzKey = name + "_" + bts.getBscName() + "_" + bts.getBtsId();// 基站标识
 			if ("BBU1".equals(array[1])) {
 				if (btsName.contains("共站")) {
 					// BBU1包含共站，物理站点中能找到相同名称站点
 					BtsSite btsSite = noIndoorMap.get(name);
 					if (btsSite == null) {
-						return null;
+						bts.setJudgeMsg(WrongMsg.BBU_BTS_NOTEXIST.getWrongMsg());
+						return bts;
 					} else {
 						bts.setRelatedWyBts(btsSite.getIntId());
 					}
 
 				} else {
 					// BBU1不含共站，包含机房产权和传输产权
-					String circuitRoom_ownership = "";
-					String Trans_ownership = "";
+					String circuitRoomOwnership = "";
+					String transOwnership = "";
+					int rightFlag=0;
 					if (highFlag) {
-						circuitRoom_ownership = array[3];
-						Trans_ownership = array[4];
+						rightFlag=3;
 					} else {
-						circuitRoom_ownership = array[2];
-						Trans_ownership = array[3];
+						rightFlag=2;
 					}
-					if (!AnalyseUtil.isRight(circuitRoom_ownership))
-						return null;
-					if (!AnalyseUtil.isRight(Trans_ownership))
-						return null;
+					//XX_BBU_HG_电_电
+					if(rightFlag>array.length-2){
+						bts.setJudgeMsg(WrongMsg.MISS.getWrongMsg());
+						return bts;
+					}
+					circuitRoomOwnership = array[rightFlag];
+					transOwnership = array[rightFlag+1];
+					if (!AnalyseUtil.isRight(circuitRoomOwnership)){
+						bts.setJudgeMsg(WrongMsg.OWNER_RIGHT.getWrongMsg());
+						return bts;
+					}
+					if (!AnalyseUtil.isRight(transOwnership)){
+						bts.setJudgeMsg(WrongMsg.TRANS_RIGHT.getWrongMsg());
+						return bts;
+					}
+					bts.setCircuitRoomOwnership(circuitRoomOwnership);
+					bts.setTransOwnership(transOwnership);
 				}
 			} else {
 				// 如果BBU2以后一定得有共站
 				if (!btsName.contains("共站")) {
-					return null;
+					bts.setJudgeMsg(WrongMsg.BBU_BHGZ.getWrongMsg());
+					return bts;
 				}
 			}
 
 		} catch (Exception e) {
-			logger.error("" + e.getMessage(), e);
-			return null;// 解析异常
+			bts.setJudgeMsg(WrongMsg.ERROR.getWrongMsg());
+			logger.error(e.getMessage()+"===="+bts.getName(), e);
+			return bts;// 解析异常
 		}
 		return bts;
 	}

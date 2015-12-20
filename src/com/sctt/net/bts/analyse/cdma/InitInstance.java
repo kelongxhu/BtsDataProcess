@@ -7,6 +7,8 @@ public class InitInstance {
 	private static InitInstance instance = null;
 
 	private Map<String, Integer> cityMap = new HashMap<String, Integer>();
+	
+	private Map<String,Integer> lteCityMap=new HashMap<String,Integer>();
 
 	private InitInstance() {
 
@@ -37,6 +39,21 @@ public class InitInstance {
 		cityMap.put("408057399", 10007);
 		cityMap.put("203856069", 10002);
 	}
+	
+	/**
+	 * 初始化原网管和先系统本地网编号对应关系
+	 */
+	public void initLteCityMap() {
+		lteCityMap.put("黔东南", 10006);
+		lteCityMap.put("安顺", 10004);
+		lteCityMap.put("毕节", 10008);
+		lteCityMap.put("遵义", 10003);
+		lteCityMap.put("黔南", 10005);
+		lteCityMap.put("六盘水", 10009);
+		lteCityMap.put("黔西南", 10010);
+		lteCityMap.put("铜仁", 10007);
+		lteCityMap.put("贵阳", 10002);
+	}
 
 	/**
 	 * 获取地市wy_city编号
@@ -48,4 +65,9 @@ public class InitInstance {
 		return cityMap.get(cityId);
 	}
 
+	public Integer getLteCityId(String cityName) {
+		return lteCityMap.get(cityName);
+	}
+	
+	
 }

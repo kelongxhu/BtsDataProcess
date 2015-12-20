@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 
+import com.sctt.net.bts.analyse.cdma.InitInstance;
 import com.sctt.net.bts.bean.cdma.WyBtsSpecial;
 import com.sctt.net.bts.bean.cdma.WyWrongName;
 import com.sctt.net.bts.bean.lte.Enodeb;
@@ -87,8 +88,9 @@ public class LteBtsStat {
 		wwN.setBtsId(cell.getRelatedEnbIntId());
 		wwN.setBtsName(cell.getRelateEnbUserLabel());
 		wwN.setType(Constants.CELL);//ะกว๘
-		wwN.setCityId(cell.getCityId());
+		wwN.setCityId(InitInstance.getInstance().getLteCityId(cell.getCityName()));
 		wwN.setNetType(Constants.LTE);
+		wwN.setWrongMsg(cell.getJudgeMsg());
 		wrongMap.put(cell.getIntId() + "", wwN);
 	}
 
@@ -96,10 +98,10 @@ public class LteBtsStat {
 		WyWrongName wwN = new WyWrongName();
 		wwN.setInt_id(bbu.getIntId());
 		wwN.setCellName(bbu.getUserLabel());
-		wwN.setCityId(bbu.getCityId());
-		// wwN.setBtsName();
+		wwN.setCityId(InitInstance.getInstance().getLteCityId(bbu.getCityName()));
 		wwN.setNetType(Constants.LTE);
 		wwN.setType(Constants.BBU);//bbu
+		wwN.setWrongMsg(bbu.getJudgeMsg());
 		wrongMap.put(bbu.getIntId() + "", wwN);
 	}
 
@@ -132,6 +134,7 @@ public class LteBtsStat {
 		String name = bbu.getUserLabel();
 		String type = name.substring(name.length() - 2);
 		WyBtsSpecial btsSpecical = new WyBtsSpecial();
+		btsSpecical.setName(bbu.getUserLabel());
 		btsSpecical.setIntId(bbu.getIntId());
 		btsSpecical.setBtsName(bbu.getUserLabel());
 		btsSpecical.setDeleteFlag(0);

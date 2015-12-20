@@ -153,12 +153,12 @@ public class BtsImpl implements BtsDao {
 	 * 插入错误小区名称
 	 */
 	public int insertWyWrongName(WyWrongName wwn) throws Exception {
-		String sql = "INSERT INTO WY_WRONGNAME(INT_ID,CELL_NAME,BSC_NAME,BTS_ID,BTSNAME,TYPE,CITY_ID,NET_TYPE)VALUES(?,?,?,?,?,?,?,?)";
+		String sql = "INSERT INTO WY_WRONGNAME(INT_ID,CELL_NAME,BSC_NAME,BTS_ID,BTSNAME,TYPE,CITY_ID,NET_TYPE，WRONG_MSG)VALUES(?,?,?,?,?,?,?,?,?)";
 		Object[] params = new Object[] { wwn.getInt_id(), wwn.getCellName(),
 				wwn.getBscName(), wwn.getBtsId(), wwn.getBtsName(),
-				wwn.getType(), wwn.getCityId(),wwn.getNetType() };
+				wwn.getType(), wwn.getCityId(),wwn.getNetType(),wwn.getWrongMsg() };
 		int[] types = new int[] { Types.BIGINT, Types.VARCHAR, Types.VARCHAR,
-				Types.BIGINT, Types.VARCHAR, Types.INTEGER, Types.INTEGER,Types.INTEGER };
+				Types.BIGINT, Types.VARCHAR, Types.INTEGER, Types.INTEGER,Types.INTEGER,Types.VARCHAR };
 		return jdbcTemplate.update(sql, params, types);
 	}
 
@@ -166,12 +166,12 @@ public class BtsImpl implements BtsDao {
 	 * 更新错误小区名称
 	 */
 	public int updateWyWrongName(WyWrongName wwn) throws Exception {
-		String sql = "update WY_WRONGNAME set CELL_NAME=?,BSC_NAME=?,BTS_ID=?,BTSNAME=?,TYPE=?,UPDATETIME=sysdate,DELETE_FLAG=?,CITY_ID=?,NET_TYPE=? where INT_ID=?";
+		String sql = "update WY_WRONGNAME set CELL_NAME=?,BSC_NAME=?,BTS_ID=?,BTSNAME=?,TYPE=?,UPDATETIME=sysdate,DELETE_FLAG=?,CITY_ID=?,NET_TYPE=?,WRONG_MSG=? where INT_ID=?";
 		Object[] params = new Object[] { wwn.getCellName(), wwn.getBscName(),
 				wwn.getBtsId(), wwn.getBtsName(), wwn.getType(),
-				wwn.getDeleteFlag(), wwn.getCityId(), wwn.getNetType(),wwn.getInt_id() };
+				wwn.getDeleteFlag(), wwn.getCityId(), wwn.getNetType(),wwn.getWrongMsg(),wwn.getInt_id() };
 		int[] types = new int[] { Types.VARCHAR, Types.VARCHAR, Types.BIGINT,
-				Types.VARCHAR, Types.INTEGER, Types.INTEGER, Types.INTEGER,Types.INTEGER,
+				Types.VARCHAR, Types.INTEGER, Types.INTEGER, Types.INTEGER,Types.INTEGER,Types.VARCHAR,
 				Types.BIGINT };
 		return jdbcTemplate.update(sql, params, types);
 	}

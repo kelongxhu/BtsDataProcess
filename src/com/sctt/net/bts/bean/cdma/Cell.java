@@ -50,6 +50,7 @@ public class Cell {
 	
 	private int sourceCityId;
 	private boolean isSpecial;//是否特殊站点
+	private String judgeMsg;//错误小区原因
 
 	public long getIntId() {
 		return intId;
@@ -314,6 +315,14 @@ public class Cell {
 
 	public void setSpecial(boolean isSpecial) {
 		this.isSpecial = isSpecial;
+	}
+
+	public String getJudgeMsg() {
+		return judgeMsg;
+	}
+
+	public void setJudgeMsg(String judgeMsg) {
+		this.judgeMsg = judgeMsg;
 	}
 
 	

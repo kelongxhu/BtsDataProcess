@@ -21,6 +21,8 @@ public class Enodeb {
 	private boolean isSpecial;//是否特殊站点
 	private String judgeMsg;//错误bbu的判定原因
 	private Integer deleteFlag;//删除标识
+	private String cityName;//地市
+	private String siteTogether;
 	public Long getIntId() {
 		return intId;
 	}
@@ -118,6 +120,18 @@ public class Enodeb {
 	}
 	public void setDeleteFlag(Integer deleteFlag) {
 		this.deleteFlag = deleteFlag;
+	}
+	public String getCityName() {
+		return cityName;
+	}
+	public void setCityName(String cityName) {
+		this.cityName = cityName;
+	}
+	public String getSiteTogether() {
+		return siteTogether;
+	}
+	public void setSiteTogether(String siteTogether) {
+		this.siteTogether = siteTogether;
 	}
 	
 	

@@ -18,6 +18,7 @@ public class LteBbu {
 	private String hightranFlag;
 	private Integer redlineFlag;
 	private Integer deleteFlag;//删除标识
+	private String siteTogether;//共站标识
 	public Long getIntId() {
 		return intId;
 	}
@@ -122,6 +123,12 @@ public class LteBbu {
 	}
 	public void setDeleteFlag(Integer deleteFlag) {
 		this.deleteFlag = deleteFlag;
+	}
+	public String getSiteTogether() {
+		return siteTogether;
+	}
+	public void setSiteTogether(String siteTogether) {
+		this.siteTogether = siteTogether;
 	}
 	
 	

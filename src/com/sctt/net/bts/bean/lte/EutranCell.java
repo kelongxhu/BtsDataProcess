@@ -32,6 +32,7 @@ public class EutranCell {
 	private int deleteFlag;
 	private boolean isSpecial;//是否特殊站点
     private String siteTogether;
+    private String cityName;//地市区域
 	public Long getIntId() {
 		return intId;
 	}
@@ -172,6 +173,13 @@ public class EutranCell {
 	}
 	public void setWyLteIntId(long wyLteIntId) {
 		this.wyLteIntId = wyLteIntId;
+	}
+	
+	public String getCityName() {
+		return cityName;
+	}
+	public void setCityName(String cityName) {
+		this.cityName = cityName;
 	}
 	@Override
 	public String toString() {

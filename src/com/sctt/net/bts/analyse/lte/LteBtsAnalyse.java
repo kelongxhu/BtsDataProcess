@@ -238,23 +238,24 @@ public class LteBtsAnalyse implements Runnable {
 	public EutranCell judgeCell(EutranCell cell,Map<String, Country> countryMap) {
 		try {
 			String cellName = cell.getUserLabel();
+			//系统号_BTS序号_小区序号_市/县/区+小区名_高铁信息标识_室分/隧道_拉远_基站产权标识_传输产权标识_维护等级_多网共站标识_直放站标识_小区功分信息标识。
+			// 必含字段：系统号_BTS序号_小区序号_市/县/区+小区名_基站产权标识_传输产权标识_维护等级
+			// 可含字段：高铁信息标识_室分_拉远_多网共站标识_直放站标识_小区功分信息标识。
+			String btsName = cell.getRelateEnbUserLabel();
+			String[] splitName = cellName.split("_");
+			int cellLength = splitName.length;
+			if (cellLength < 8) {
+				//缺失字段
+				cell.setJudgeMsg(WrongMsg.MISS.getWrongMsg());
+				return cell;
+			}	
 			String specialName=cellName.substring(cellName.length()-2);
 			boolean specialFlag=AnalyseUtil.isSpecical(specialName);
 			cell.setSpecial(specialFlag);
 			if(specialFlag){
 				cellName=cellName.substring(0, cellName.length()-2);
 			}
-			String btsName = cell.getRelateEnbUserLabel();
-			String[] splitName = cellName.split("_");
-			int cellLength = splitName.length;
-			//系统号_BTS序号_小区序号_市/县/区+小区名_高铁信息标识_室分/隧道_拉远_基站产权标识_传输产权标识_维护等级_多网共站标识_直放站标识_小区功分信息标识。
-			// 必含字段：系统号_BTS序号_小区序号_市/县/区+小区名_基站产权标识_传输产权标识_维护等级
-			// 可含字段：高铁信息标识_室分_拉远_多网共站标识_直放站标识_小区功分信息标识。
-			if (cellLength < 8) {
-				//缺失字段
-				cell.setJudgeMsg(WrongMsg.MISS.getWrongMsg());
-				return cell;
-			}	
+			
 			String name = splitName[3];//站点名称
 			//区县是否在配置表中
 			Country country = AnalyseUtil.getCountry(countryMap, name);
@@ -269,7 +270,6 @@ public class LteBtsAnalyse implements Runnable {
 			// 计算是否高铁覆盖
 			int cqFlag = 0;
 			boolean isHighFlag = AnalyseUtil.isHighBts(splitName[4]);
-			boolean isTunel = false;
 			String tunelStr = "";
 			if (isHighFlag) {
 				cqFlag = AnalyseUtil.getCqFlag(splitName, 5);// 产权开始标记
@@ -295,7 +295,7 @@ public class LteBtsAnalyse implements Runnable {
 				cell.setIsIndoor("否");
 			}
 			// cqFlag:基站产权标识, 传输产权，维护等级必选项
-			if(cqFlag+2<cellLength){
+			if(cqFlag+2>=cellLength){
 				//缺失字段
 				cell.setJudgeMsg(WrongMsg.MISS.getWrongMsg());
 				return cell;
@@ -396,7 +396,7 @@ public class LteBtsAnalyse implements Runnable {
 
 		} catch (Exception e) {
 			cell.setJudgeMsg(WrongMsg.ERROR.getWrongMsg());
-			logger.error(e.getMessage(),e);
+			logger.error(e.getMessage()+"====="+cell.getUserLabel(),e);
 			return cell;// 解析异常，不规则小区
 		}
 
@@ -413,7 +413,7 @@ public class LteBtsAnalyse implements Runnable {
 	public Enodeb ruleLteBbu(Enodeb bts, Map<String, LteBts> noIndoorMap,
 			Map<String, Country> countryMap) {
 		try {
-			// 增加高铁标识,沿河思渠接入网_BBU1_GGH_电_电
+			// 增加高铁标识,沿河思渠接入网_BBU1_GGH_电_电_共站
 			//纯BBU,乌当行政中心_BBU1_电_电
 			//共站bbu，乌当行政中心_BBU3_共站
 			String btsName = bts.getUserLabel();
@@ -425,7 +425,7 @@ public class LteBtsAnalyse implements Runnable {
 			}
 			String[] array = btsName.split("_");
 			int length = array.length;
-			if (!(length > 2 && length < 6)) {
+			if (!(length > 2 && length < 7)) {
 				bts.setJudgeMsg(WrongMsg.MISS.getWrongMsg());
 				return bts;
 			}
@@ -442,6 +442,7 @@ public class LteBtsAnalyse implements Runnable {
 			}
 			// 是否高铁标识
 			boolean highFlag = AnalyseUtil.isHighBts(array[2]);
+			//标记最大位
 			if (highFlag) {
 				bts.setHighTrainFlag(array[2]);
 				String redLine = array[2].substring(array[2].length() - 1);
@@ -471,13 +472,19 @@ public class LteBtsAnalyse implements Runnable {
 					// BBU1不含共站，包含机房产权和传输产权
 					String circuitRoomOwnership = "";
 					String transOwnership = "";
+					int rightFlag=0;
 					if (highFlag) {
-						circuitRoomOwnership = array[3];
-						transOwnership = array[4];
+						rightFlag=3;
 					} else {
-						circuitRoomOwnership = array[2];
-						transOwnership = array[3];
+						rightFlag=2;
 					}
+					//XX_BBU_HG_电_电
+					if(rightFlag>array.length-2){
+						bts.setJudgeMsg(WrongMsg.MISS.getWrongMsg());
+						return bts;
+					}
+					circuitRoomOwnership = array[rightFlag];
+					transOwnership = array[rightFlag+1];
 					if (!AnalyseUtil.isRight(circuitRoomOwnership)){
 						bts.setJudgeMsg(WrongMsg.OWNER_RIGHT.getWrongMsg());
 						return bts;
@@ -488,17 +495,35 @@ public class LteBtsAnalyse implements Runnable {
 					}
 					bts.setCircuitRoomOwnership(circuitRoomOwnership);
 					bts.setTransOwnership(transOwnership);
+					//XX_BBU1_电_电_FX
+					int togetherFlag=rightFlag+2;
+					if(togetherFlag==array.length-1){
+						//共站标识
+						String togetherStr=array[togetherFlag];
+						if(AnalyseUtil.isTogether(togetherStr)){
+							bts.setSiteTogether(togetherStr);
+						}else{
+							bts.setJudgeMsg(WrongMsg.TOGETHER.getWrongMsg());
+							return bts;
+						}
+					}
 				}
 			} else {
-				// 如果BBU2以后一定得有共站
-				if (!array[2].equals("共站")) {
+				// BBU2只有共站字符,最后一位是共站标识
+				int gzFlag=0;
+				if(highFlag){
+					gzFlag=3;
+				}else{
+					gzFlag=2;
+				}
+				if (!array[gzFlag].equals("共站")||gzFlag!=array.length-1) {
 					bts.setJudgeMsg(WrongMsg.BBU_BHGZ.getWrongMsg());
 					return bts;
 				}
 			}
 		} catch (Exception e) {
 			bts.setJudgeMsg(WrongMsg.ERROR.getWrongMsg());
-			logger.error("" + e.getMessage(), e);
+			logger.error(e.getMessage()+"===="+bts.getUserLabel(), e);
 			return bts;// 解析异常
 		}
 		return bts;

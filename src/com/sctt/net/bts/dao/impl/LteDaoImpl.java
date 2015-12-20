@@ -29,7 +29,7 @@ public class LteDaoImpl implements LteDao {
 	@Override
 	public List<EutranCell> selectEutranCell() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("select int_id,userlabel,related_enb_userlabel,related_enb_int_id,vendor_name from tco_pro_eutrancell_m");
+		sb.append("select int_id,userlabel,related_enb_userlabel,related_enb_int_id,vendor_name,region_name from tco_pro_eutrancell_m");
 		List list = jdbcTemplate.queryForList(sb.toString());
 		List<EutranCell> cells = new ArrayList<EutranCell>();
 		for (int i = 0; i < list.size(); i++) {
@@ -42,6 +42,7 @@ public class LteDaoImpl implements LteDao {
 					.get("related_enb_userlabel")));
 			cell.setUserLabel(StringUtils.objToString(map.get("userlabel")));
 			cell.setVendorName(StringUtils.objToString(map.get("vendor_name")));
+			cell.setCityName(StringUtils.objToString(map.get("region_name")));
 			cells.add(cell);
 		}
 		return cells;
@@ -50,7 +51,7 @@ public class LteDaoImpl implements LteDao {
 	@Override
 	public List<Enodeb> selectEnodeb() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("select int_id,userlabel,vendor_name,enb_id from tco_pro_enodeb_m where userlabel like '%BBU%'");
+		sb.append("select int_id,userlabel,vendor_name,enb_id,region_name from tco_pro_enodeb_m where userlabel like '%BBU%'");
 		List list = jdbcTemplate.queryForList(sb.toString());
 		List<Enodeb> enodebs = new ArrayList();
 		for (int i = 0; i < list.size(); i++) {
@@ -60,6 +61,7 @@ public class LteDaoImpl implements LteDao {
 			enodeb.setUserLabel(StringUtils.objToString(map.get("userlabel")));
 			enodeb.setVenderName(StringUtils.objToString(map.get("vendor_name")));
 			enodeb.setEnbId(StringUtils.objToInt(map.get("enb_id")));
+			enodeb.setCityName(StringUtils.objToString(map.get("region_name")));
 			enodebs.add(enodeb);
 		}
 		return enodebs;
@@ -232,7 +234,7 @@ public class LteDaoImpl implements LteDao {
 
 	@Override
 	public Map<String, LteBbu> selectLteBbu() {
-		String sql = "select INT_ID,DELETE_FLAG from wy_bbu";
+		String sql = "select INT_ID,DELETE_FLAG from wy_lte_bbu";
 		List list = jdbcTemplate.queryForList(sql);
 		Map<String, LteBbu> bbuMap = new HashMap<String, LteBbu>();
 		for (int i = 0; i < list.size(); i++) {
@@ -248,35 +250,35 @@ public class LteDaoImpl implements LteDao {
 	@Override
 	public int insertLteBbu(LteBbu bbu) {
 		String sql = "insert into wy_lte_bbu(INT_ID,NAME,BBU_NO,ENB_ID,ENB_BTS_NAME,ENB_BTS_ID,CIRCUITROOM_OWNERSHIP,TRANS_OWNERSHIP,VENDOR_NAME,CITY_ID,COUNTY_ID,"
-				+ "IS_SHARE,BBU_TYPE,WY_LTE_BTSID,HIGHTRAIN_FLAG,REDLINE_FLAG)values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+				+ "IS_SHARE,BBU_TYPE,WY_LTE_BTSID,HIGHTRAIN_FLAG,REDLINE_FLAG,SITE_TOGETHER)values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 		Object[] params = new Object[] { bbu.getIntId(), bbu.getName(),
 				bbu.getBbuNo(),bbu.getEnbId(),bbu.getEnbBtsName(), bbu.getRelateEnbBtsId(),
 				bbu.getCircuitRoomOwnership(), bbu.getTransOwnership(),
 				bbu.getVendorName(), bbu.getCityId(),
 				bbu.getCountryId(), 
 				bbu.getIsShare(), bbu.getBuuType(), bbu.getWyLteBtsId(),
-				bbu.getHightranFlag(), bbu.getRedlineFlag()};
+				bbu.getHightranFlag(), bbu.getRedlineFlag(),bbu.getSiteTogether()};
 		int[] types = new int[] { Types.BIGINT, Types.VARCHAR, Types.VARCHAR,Types.INTEGER,
 				Types.VARCHAR,Types.BIGINT, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR,
 				Types.INTEGER, Types.INTEGER,Types.INTEGER,
-				Types.INTEGER, Types.BIGINT, Types.VARCHAR, Types.INTEGER };
+				Types.INTEGER, Types.BIGINT, Types.VARCHAR, Types.INTEGER,Types.VARCHAR };
 		return jdbcTemplate.update(sql, params, types);
 	}
 
 	@Override
 	public int updateLteBbu(LteBbu bbu) {
 		String sql = "update wy_lte_bbu set NAME=?,BBU_NO=?,ENB_ID=?,ENB_BTS_NAME=?,ENB_BTS_ID=?,CIRCUITROOM_OWNERSHIP=?,TRANS_OWNERSHIP=?,VENDOR_NAME=?,CITY_ID=?,COUNTY_ID=?,"
-				+ "IS_SHARE=?,BBU_TYPE=?,WY_LTE_BTSID=?,HIGHTRAIN_FLAG=?,REDLINE_FLAG=? where INT_ID=?";
+				+ "IS_SHARE=?,BBU_TYPE=?,WY_LTE_BTSID=?,HIGHTRAIN_FLAG=?,REDLINE_FLAG=?,SITE_TOGETHER=? where INT_ID=?";
 		Object[] params = new Object[] {bbu.getName(),
 				bbu.getBbuNo(),bbu.getEnbId(), bbu.getEnbBtsName(), bbu.getRelateEnbBtsId(),
 				bbu.getCircuitRoomOwnership(), bbu.getTransOwnership(),
 				bbu.getVendorName(), bbu.getCityId(),
 				bbu.getCountryId(), bbu.getIsShare(), bbu.getBuuType(), bbu.getWyLteBtsId(),
-				bbu.getHightranFlag(), bbu.getRedlineFlag(),bbu.getIntId()};
+				bbu.getHightranFlag(), bbu.getRedlineFlag(),bbu.getSiteTogether(),bbu.getIntId()};
 		int[] types = new int[] { Types.VARCHAR, Types.VARCHAR,Types.INTEGER,
 				Types.VARCHAR,Types.BIGINT, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR,
 				Types.INTEGER, Types.INTEGER,Types.INTEGER,
-				Types.INTEGER, Types.BIGINT, Types.VARCHAR, Types.INTEGER,Types.BIGINT };
+				Types.INTEGER, Types.BIGINT, Types.VARCHAR, Types.INTEGER,Types.VARCHAR,Types.BIGINT };
 		return jdbcTemplate.update(sql, params, types);
 	}
 

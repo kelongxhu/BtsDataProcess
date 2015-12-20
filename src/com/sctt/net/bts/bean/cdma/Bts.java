@@ -3,8 +3,8 @@ package com.sctt.net.bts.bean.cdma;
 public class Bts {
 	private long intId;
 	private String name;
-	private double longitude;// 经度
-	private double latitude;// 纬度
+	private double longitude;  // 经度
+	private double latitude;   // 纬度
 	private String bscName;
 	private long btsId;
 	private String vendorBtsType;
@@ -19,12 +19,14 @@ public class Bts {
 	private int cityId;// 地市ID
 	private int countryId;// 区县ID
 	
-	
+	private String circuitRoomOwnership;
+	private String transOwnership;
 	private int sourceCityId;
 	private String highTrainFlag;//高铁覆盖标识
 	private Integer redLineFlag;//1=红线内，2=红线外
 	
 	private boolean isSpecial;//是否特殊站点
+	private String judgeMsg;//错误命名判断原因
 
 	public long getIntId() {
 		return intId;
@@ -145,15 +147,29 @@ public class Bts {
 	public void setSpecial(boolean isSpecial) {
 		this.isSpecial = isSpecial;
 	}
-	
-	
 
-	
-	
-	
-	
-	
-	
-	
+	public String getJudgeMsg() {
+		return judgeMsg;
+	}
 
+	public void setJudgeMsg(String judgeMsg) {
+		this.judgeMsg = judgeMsg;
+	}
+
+	public String getCircuitRoomOwnership() {
+		return circuitRoomOwnership;
+	}
+
+	public void setCircuitRoomOwnership(String circuitRoomOwnership) {
+		this.circuitRoomOwnership = circuitRoomOwnership;
+	}
+
+	public String getTransOwnership() {
+		return transOwnership;
+	}
+
+	public void setTransOwnership(String transOwnership) {
+		this.transOwnership = transOwnership;
+	}	
+    
 }

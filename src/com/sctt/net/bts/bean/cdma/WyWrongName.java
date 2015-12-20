@@ -14,8 +14,9 @@ public class WyWrongName {
 	private Long btsId;// 基站ID
 	private String btsName;//基站名称
 	private int type;//错误类型
-	private int cityId;//所在本地网
+	private Integer cityId;//所在本地网
 	private Integer netType;//网络类型
+	private String wrongMsg;//错误原因
 	
 	
 	private int deleteFlag;
@@ -70,11 +71,12 @@ public class WyWrongName {
 		this.type = type;
 	}
 
-	public int getCityId() {
+	
+	public Integer getCityId() {
 		return cityId;
 	}
 
-	public void setCityId(int cityId) {
+	public void setCityId(Integer cityId) {
 		this.cityId = cityId;
 	}
 
@@ -93,5 +95,14 @@ public class WyWrongName {
 	public void setNetType(Integer netType) {
 		this.netType = netType;
 	}
+
+	public String getWrongMsg() {
+		return wrongMsg;
+	}
+
+	public void setWrongMsg(String wrongMsg) {
+		this.wrongMsg = wrongMsg;
+	}
+	
 
 }
