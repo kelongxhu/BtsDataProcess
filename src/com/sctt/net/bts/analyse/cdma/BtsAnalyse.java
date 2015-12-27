@@ -15,6 +15,7 @@ import com.sctt.net.bts.bean.cdma.TunelSite;
 import com.sctt.net.bts.bean.cdma.WyBbu;
 import com.sctt.net.bts.bean.cdma.WyBtsSpecial;
 import com.sctt.net.bts.bean.cdma.WyWrongName;
+import com.sctt.net.bts.bean.lte.EutranCell;
 import com.sctt.net.bts.dao.BtsDao;
 import com.sctt.net.bts.service.BizService;
 import com.sctt.net.common.util.AnalyseUtil;
@@ -86,24 +87,26 @@ public class BtsAnalyse implements Runnable {
 				if (AnalyseUtil.ignoreCell(cell.getName())) {
 					continue;// 忽略小区
 				}
-				Cell ruleCell = ruleCell(cell);
-				if (ruleCell != null) {
-					// 小区名称符合规则，进行物理基站统计
-					boolean tunelFlag = ruleCell.isTunel();
-					if (tunelFlag) {
-						// 统计隧道
-						stat.tunelStat(ruleCell, countryMap);
-					} else {
-						// 统计室内、室外
-						stat.btsStat(ruleCell, countryMap);
-					}
-					boolean specailFlag = ruleCell.isSpecial();
+				Cell judgeCell=ruleCell(cell,countryMap);
+				String judgeMsg=judgeCell.getJudgeMsg();
+				if (StringUtils.isEmpty(judgeMsg)) {
+					boolean specailFlag = judgeCell.isSpecial();
 					if (specailFlag) {
-						stat.addSpecialCell(ruleCell);
+						stat.addSpecialCell(judgeCell);
+					}else{
+						// 小区名称符合规则，进行物理基站统计
+						boolean tunelFlag = judgeCell.isTunel();
+						if (tunelFlag) {
+							// 统计隧道
+							stat.tunelStat(judgeCell);
+						} else {
+							// 统计室内、室外
+							stat.btsStat(judgeCell);
+						}
 					}
 				} else {
 					// 小区名称不符合规则,入库c_cell_wrongname表
-					stat.addWrongCell(cell);
+					stat.addWrongCell(judgeCell);
 				}
 			}
 			// 测试
@@ -138,12 +141,14 @@ public class BtsAnalyse implements Runnable {
 			logger.info("从wy_bbu表采集到BBU数据:" + yesBbuMap.size());
 			for (Bts bbu : bbus) {
 				Bts ruleBbu = ruleBbu(bbu, noIndoorMap, countryMap);
-				if (ruleBbu != null) {
-					bbuStat.bbuStat(ruleBbu);
+				String judgeMsg=ruleBbu.getJudgeMsg();
+				if (StringUtils.isEmpty(judgeMsg)) {
 					// 统计特殊站点
 					boolean specialFlag = ruleBbu.isSpecial();
 					if (specialFlag) {
 						stat.addSpecialBts(ruleBbu);
+					}else{
+						bbuStat.bbuStat(ruleBbu);
 					}
 				} else {
 					// 错误命名BBU
@@ -435,15 +440,9 @@ public class BtsAnalyse implements Runnable {
 	 *            ：小区对象
 	 * @return
 	 */
-	public Cell ruleCell(Cell cell) {
+	public Cell ruleCell(Cell cell,Map<String, Country> countryMap) {
 		try {
 			String cellName = cell.getName();
-			String specialName = cellName.substring(cellName.length() - 2);
-			boolean specialFlag = AnalyseUtil.isSpecical(specialName);
-			cell.setSpecial(specialFlag);
-			if (specialFlag) {
-				cellName = cellName.substring(0, cellName.length() - 2);
-			}
 			String btsName = cell.getBtsName();
 			String[] splitName = cellName.split("_");
 			int cellLength = splitName.length;
@@ -451,6 +450,23 @@ public class BtsAnalyse implements Runnable {
 			// 可含字段：室分_拉远_直放站标识_小区功分信息标识。
 			if (cellLength < 7) {
 				cell.setJudgeMsg(WrongMsg.MISS.getWrongMsg());
+				return cell;
+			}
+			String specialName = cellName.substring(cellName.length() - 2);
+			boolean specialFlag = AnalyseUtil.isSpecical(specialName);
+			cell.setSpecial(specialFlag);
+			if (specialFlag) {
+				cellName = cellName.substring(0, cellName.length() - 2);
+			}
+			String name = splitName[3];//站点名称
+			//区县是否在配置表中
+			Country country = AnalyseUtil.getCountry(countryMap, name);
+			if (country != null) {
+				cell.setCityId(country.getCityId());
+				cell.setCountryId(country.getId());
+			} else {
+				// 未找到对应的所属区县为错误小区命名
+				cell.setJudgeMsg(WrongMsg.CITY.getWrongMsg());
 				return cell;
 			}
 			// 计算是否高铁覆盖
@@ -530,7 +546,8 @@ public class BtsAnalyse implements Runnable {
 				for (int i = 0; i < zfEnd - zfStart; i++) {
 					String zfValue = splitName[zfStart + i];
 					if (!AnalyseUtil.isZF(zfValue)) {
-						return null;
+						cell.setJudgeMsg(WrongMsg.ZF.getWrongMsg());
+						return cell;
 					} else {
 						// 包含直放站、具体区分那一个种直放站
 						String zfType = zfValue.substring(0, 2);
@@ -684,7 +701,7 @@ public class BtsAnalyse implements Runnable {
 		Cell cell = new Cell();
 		cell.setName("0_337_2_修文民政局_电_电_A_新");
 		cell.setBtsName("修文民政局s");
-		Cell ruleCell = ruleCell(cell);
+		Cell ruleCell = ruleCell(cell,null);
 		System.out.println("OR:" + ruleCell);
 	}
 

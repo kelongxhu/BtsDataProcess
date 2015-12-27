@@ -116,7 +116,7 @@ public class LteBtsStat {
 		btsSpecical.setIntId(cell.getIntId());
 		btsSpecical.setBtsName(cell.getRelateEnbUserLabel());
 		btsSpecical.setBtsId(cell.getRelatedEnbIntId());
-		btsSpecical.setCityId(cell.getCityId());
+		btsSpecical.setCityId(InitInstance.getInstance().getLteCityId(cell.getCityName()));
 		btsSpecical.setName(cell.getUserLabel());
 		btsSpecical.setDeleteFlag(0);
 		btsSpecical.setInTime(new Date());
@@ -142,6 +142,7 @@ public class LteBtsStat {
 		btsSpecical.setNetType(Constants.LTE);// CDMA
 		btsSpecical.setState(AnalyseUtil.getSpecicalState(type));
 		btsSpecical.setType(Constants.BBU);//Õ¾µã
+		btsSpecical.setCityId(InitInstance.getInstance().getLteCityId(bbu.getCityName()));
 		btsSpecialMap.put(bbu.getIntId()+"", btsSpecical);
 	}
 

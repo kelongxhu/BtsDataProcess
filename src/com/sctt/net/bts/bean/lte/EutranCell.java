@@ -10,6 +10,7 @@ public class EutranCell {
 	private String userLabel;//小区名称
 	private String vendorName;
 	private Long relatedEnbIntId;//关联基站ID
+	private String eci; //ECI
 	
 	//冗余消息
 	private String judgeMsg;//判断错误命名消息
@@ -180,6 +181,13 @@ public class EutranCell {
 	}
 	public void setCityName(String cityName) {
 		this.cityName = cityName;
+	}
+	
+	public String getEci() {
+		return eci;
+	}
+	public void setEci(String eci) {
+		this.eci = eci;
 	}
 	@Override
 	public String toString() {

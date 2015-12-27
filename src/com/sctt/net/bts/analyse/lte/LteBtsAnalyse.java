@@ -65,11 +65,12 @@ public class LteBtsAnalyse implements Runnable {
 				EutranCell judgeCell=judgeCell(cell,countryMap);
 				String judgeMsg=judgeCell.getJudgeMsg();
 				if(StringUtils.isEmpty(judgeMsg)){
-					stat.btsStat(judgeCell);
 					//添加到特殊站点统计
 					boolean isSpeacial=judgeCell.isSpecial();
 					if(isSpeacial){
 						stat.addSpecialCell(judgeCell);
+					}else{
+						stat.btsStat(judgeCell);
 					}
 				}else{
 					//错误命名小区
@@ -90,11 +91,12 @@ public class LteBtsAnalyse implements Runnable {
 				Enodeb judgeBbu = ruleLteBbu(bbu, noIndoorMap, countryMap);
 				String bbuJudgeMsg=judgeBbu.getJudgeMsg();
 				if (StringUtils.isEmpty(bbuJudgeMsg)) {
-					bbuStat.bbuStat(judgeBbu);
 					//统计特殊站点
 					boolean specialFlag=judgeBbu.isSpecial();
 					if(specialFlag){
 						stat.addSpecialBts(judgeBbu);
+					}else{
+						bbuStat.bbuStat(judgeBbu);
 					}
 				} else {
 					// 错误命名BBU

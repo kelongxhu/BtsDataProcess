@@ -42,7 +42,7 @@ public class BtsStat {
 	 *            小区信息
 	 * @return：物理站点的唯一标识
 	 */
-	public void btsStat(Cell cell, Map<String, Country> countryMap) {
+	public void btsStat(Cell cell) {
 		String cellName = cell.getName();
 		String[] splitName = cellName.split("_");
 		String name = splitName[3];// 物理站点名称
@@ -57,20 +57,8 @@ public class BtsStat {
 		} else {
 			cell.setIsRru("否");
 		}
-
-		// 通过小区名称的前三个字符判断小区所属区县
-		Country country = AnalyseUtil.getCountry(countryMap, name);
-		if (country != null) {
-			cell.setCityId(country.getCityId());
-			cell.setCountryId(country.getId());
-		} else {
-			// 未找到对应的所属区县为错误小区命名
-			addWrongCell(cell);
-			return;
-		}
 		String btsKey = name + "_" + cell.getBscName() + "_" + cell.getBtsId();
 		long btsKeyCode = btsKey.hashCode();
-
 		BtsSite btsSite = btssiteMap.get(btsKeyCode + "");
 		if (btsSite == null) {
 			btsSite = new BtsSite();
@@ -121,7 +109,7 @@ public class BtsStat {
 	 *            ：小区、区县
 	 * @param countryMap
 	 */
-	public void tunelStat(Cell cell, Map<String, Country> countryMap) {
+	public void tunelStat(Cell cell) {
 		String cellName = cell.getName();
 		String[] splitName = cellName.split("_");
 		String name = splitName[3];// 物理站点名称
@@ -130,17 +118,6 @@ public class BtsStat {
 			cell.setIsRru("是");
 		} else {
 			cell.setIsRru("否");
-		}
-
-		// 通过小区名称的前三个字符判断小区所属区县
-		Country country = AnalyseUtil.getCountry(countryMap, name);
-		if (country != null) {
-			cell.setCityId(country.getCityId());
-			cell.setCountryId(country.getId());
-		} else {
-			// 未找到对应的所属区县为错误小区命名
-			addWrongCell(cell);
-			return;
 		}
 		String btsKey = name + "_" + cell.getBscName() + "_" + cell.getBtsId();
 		long btsKeyCode = btsKey.hashCode();
@@ -223,6 +200,7 @@ public class BtsStat {
 		wwN.setType(Constants.CELL);
 		wwN.setCityId(InitInstance.getInstance().getCityId(
 				cell.getSourceCityId() + ""));
+		wwN.setWrongMsg(cell.getJudgeMsg());
 		wrongMap.put(cell.getIntId() + "", wwN);
 	}
 
@@ -236,6 +214,7 @@ public class BtsStat {
 		wwN.setCityId(InitInstance.getInstance().getCityId(
 				bbu.getSourceCityId() + ""));
 		wwN.setType(Constants.BBU);
+		wwN.setWrongMsg(bbu.getJudgeMsg());
 		wrongMap.put(bbu.getIntId() + "", wwN);
 	}
 

@@ -29,7 +29,7 @@ public class LteDaoImpl implements LteDao {
 	@Override
 	public List<EutranCell> selectEutranCell() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("select int_id,userlabel,related_enb_userlabel,related_enb_int_id,vendor_name,region_name from tco_pro_eutrancell_m");
+		sb.append("select int_id,userlabel,related_enb_userlabel,related_enb_int_id,vendor_name,region_name,eci from tco_pro_eutrancell_m");
 		List list = jdbcTemplate.queryForList(sb.toString());
 		List<EutranCell> cells = new ArrayList<EutranCell>();
 		for (int i = 0; i < list.size(); i++) {
@@ -43,6 +43,7 @@ public class LteDaoImpl implements LteDao {
 			cell.setUserLabel(StringUtils.objToString(map.get("userlabel")));
 			cell.setVendorName(StringUtils.objToString(map.get("vendor_name")));
 			cell.setCityName(StringUtils.objToString(map.get("region_name")));
+			cell.setEci(StringUtils.objToString(map.get("eci")));
 			cells.add(cell);
 		}
 		return cells;
