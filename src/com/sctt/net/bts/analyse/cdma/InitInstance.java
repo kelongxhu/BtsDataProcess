@@ -7,8 +7,8 @@ public class InitInstance {
 	private static InitInstance instance = null;
 
 	private Map<String, Integer> cityMap = new HashMap<String, Integer>();
-	
-	private Map<String,Integer> lteCityMap=new HashMap<String,Integer>();
+
+	private Map<String, Integer> lteCityMap = new HashMap<String, Integer>();
 
 	private InitInstance() {
 
@@ -39,7 +39,7 @@ public class InitInstance {
 		cityMap.put("408057399", 10007);
 		cityMap.put("203856069", 10002);
 	}
-	
+
 	/**
 	 * 初始化原网管和先系统本地网编号对应关系
 	 */
@@ -66,8 +66,11 @@ public class InitInstance {
 	}
 
 	public Integer getLteCityId(String cityName) {
-		return lteCityMap.get(cityName);
+		Integer cityId = lteCityMap.get(cityName);
+		if (cityId == null) {
+			return 0;
+		}
+		return cityId;
 	}
-	
-	
+
 }

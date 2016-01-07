@@ -58,7 +58,7 @@ public class BizServiceImpl implements BizService {
 					}
 				}
 			}
-			logger.info("错误小区增量结果：更新：" + i + ";新增：" + j + ";废弃：" + q);
+			logger.info("wy_wrongname增量结果：更新：" + i + ";新增：" + j + ";废弃：" + q);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

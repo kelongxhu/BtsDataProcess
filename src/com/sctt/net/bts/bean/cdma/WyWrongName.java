@@ -11,7 +11,7 @@ public class WyWrongName {
 	private long int_id;// 小区int_id
 	private String cellName;// 小区名称
 	private String bscName;// 基站名称
-	private Long btsId;// 基站ID
+	private long btsId;// 基站ID
 	private String btsName;//基站名称
 	private int type;//错误类型
 	private Integer cityId;//所在本地网
@@ -45,13 +45,11 @@ public class WyWrongName {
 		this.bscName = bscName;
 	}
 
-    
-
-	public Long getBtsId() {
+	public long getBtsId() {
 		return btsId;
 	}
 
-	public void setBtsId(Long btsId) {
+	public void setBtsId(long btsId) {
 		this.btsId = btsId;
 	}
 

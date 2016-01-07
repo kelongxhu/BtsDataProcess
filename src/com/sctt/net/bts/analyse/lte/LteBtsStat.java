@@ -85,7 +85,7 @@ public class LteBtsStat {
 		WyWrongName wwN = new WyWrongName();
 		wwN.setInt_id(cell.getIntId());
 		wwN.setCellName(cell.getUserLabel());
-		wwN.setBtsId(cell.getRelatedEnbIntId());
+		wwN.setBscName(cell.getEci());
 		wwN.setBtsName(cell.getRelateEnbUserLabel());
 		wwN.setType(Constants.CELL);//Ð¡Çø
 		wwN.setCityId(InitInstance.getInstance().getLteCityId(cell.getCityName()));
@@ -98,6 +98,7 @@ public class LteBtsStat {
 		WyWrongName wwN = new WyWrongName();
 		wwN.setInt_id(bbu.getIntId());
 		wwN.setCellName(bbu.getUserLabel());
+		wwN.setBscName(bbu.getEnbId()+"");
 		wwN.setCityId(InitInstance.getInstance().getLteCityId(bbu.getCityName()));
 		wwN.setNetType(Constants.LTE);
 		wwN.setType(Constants.BBU);//bbu
@@ -116,7 +117,7 @@ public class LteBtsStat {
 		btsSpecical.setIntId(cell.getIntId());
 		btsSpecical.setBtsName(cell.getRelateEnbUserLabel());
 		btsSpecical.setBtsId(cell.getRelatedEnbIntId());
-		btsSpecical.setCityId(InitInstance.getInstance().getLteCityId(cell.getCityName()));
+		btsSpecical.setCityId(cell.getCityId());
 		btsSpecical.setName(cell.getUserLabel());
 		btsSpecical.setDeleteFlag(0);
 		btsSpecical.setInTime(new Date());
@@ -142,7 +143,7 @@ public class LteBtsStat {
 		btsSpecical.setNetType(Constants.LTE);// CDMA
 		btsSpecical.setState(AnalyseUtil.getSpecicalState(type));
 		btsSpecical.setType(Constants.BBU);//Õ¾µã
-		btsSpecical.setCityId(InitInstance.getInstance().getLteCityId(bbu.getCityName()));
+		btsSpecical.setCityId(bbu.getCityId());
 		btsSpecialMap.put(bbu.getIntId()+"", btsSpecical);
 	}
 

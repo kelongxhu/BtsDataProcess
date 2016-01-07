@@ -244,20 +244,23 @@ public class LteBtsAnalyse implements Runnable {
 			// 必含字段：系统号_BTS序号_小区序号_市/县/区+小区名_基站产权标识_传输产权标识_维护等级
 			// 可含字段：高铁信息标识_室分_拉远_多网共站标识_直放站标识_小区功分信息标识。
 			String btsName = cell.getRelateEnbUserLabel();
-			String[] splitName = cellName.split("_");
-			int cellLength = splitName.length;
-			if (cellLength < 8) {
-				//缺失字段
+			//缺失字段
+			if(cellName.length()<2){
 				cell.setJudgeMsg(WrongMsg.MISS.getWrongMsg());
 				return cell;
-			}	
+			}
 			String specialName=cellName.substring(cellName.length()-2);
 			boolean specialFlag=AnalyseUtil.isSpecical(specialName);
 			cell.setSpecial(specialFlag);
 			if(specialFlag){
 				cellName=cellName.substring(0, cellName.length()-2);
-			}
-			
+			}			
+			String[] splitName = cellName.split("_");
+			int cellLength = splitName.length;
+			if (cellLength < 7) {
+				cell.setJudgeMsg(WrongMsg.MISS.getWrongMsg());
+				return cell;
+			}	
 			String name = splitName[3];//站点名称
 			//区县是否在配置表中
 			Country country = AnalyseUtil.getCountry(countryMap, name);
@@ -419,6 +422,10 @@ public class LteBtsAnalyse implements Runnable {
 			//纯BBU,乌当行政中心_BBU1_电_电
 			//共站bbu，乌当行政中心_BBU3_共站
 			String btsName = bts.getUserLabel();
+			if(btsName.length()<2){
+				bts.setJudgeMsg(WrongMsg.MISS.getWrongMsg());
+				return bts;
+			}
 			String specialName=btsName.substring(btsName.length()-2);
 			boolean specialFlag=AnalyseUtil.isSpecical(specialName);
 			bts.setSpecial(specialFlag);

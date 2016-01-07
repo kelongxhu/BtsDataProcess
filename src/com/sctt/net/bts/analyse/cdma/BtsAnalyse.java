@@ -444,11 +444,9 @@ public class BtsAnalyse implements Runnable {
 		try {
 			String cellName = cell.getName();
 			String btsName = cell.getBtsName();
-			String[] splitName = cellName.split("_");
-			int cellLength = splitName.length;
 			// 必含字段：系统号_BTS序号_小区序号_市/县/区+小区名_基站产权标识_传输产权标识_维护等级
 			// 可含字段：室分_拉远_直放站标识_小区功分信息标识。
-			if (cellLength < 7) {
+			if(cellName.length()<2){
 				cell.setJudgeMsg(WrongMsg.MISS.getWrongMsg());
 				return cell;
 			}
@@ -458,8 +456,14 @@ public class BtsAnalyse implements Runnable {
 			if (specialFlag) {
 				cellName = cellName.substring(0, cellName.length() - 2);
 			}
+			String[] splitName = cellName.split("_");
+			int cellLength = splitName.length;
+			if (cellLength < 7) {
+				cell.setJudgeMsg(WrongMsg.MISS.getWrongMsg());
+				return cell;
+			}
 			String name = splitName[3];//站点名称
-			//区县是否在配置表中
+			//区县是否在配置表中*
 			Country country = AnalyseUtil.getCountry(countryMap, name);
 			if (country != null) {
 				cell.setCityId(country.getCityId());
@@ -599,6 +603,10 @@ public class BtsAnalyse implements Runnable {
 		try {
 			// 增加高铁标识,沿河思渠接入网_BBU1_GGH_电_电
 			String btsName = bts.getName();
+			if(btsName.length()<2){
+				bts.setJudgeMsg(WrongMsg.MISS.getWrongMsg());
+				return bts;
+			}
 			String specialName = btsName.substring(btsName.length() - 2);
 			boolean specialFlag = AnalyseUtil.isSpecical(specialName);
 			bts.setSpecial(specialFlag);

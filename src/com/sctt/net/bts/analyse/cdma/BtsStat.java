@@ -194,7 +194,7 @@ public class BtsStat {
 		wwN.setInt_id(cell.getIntId());
 		wwN.setCellName(cell.getName());
 		wwN.setBtsId(cell.getBtsId());
-		wwN.setBscName(cell.getBscName());
+		wwN.setBscName(cell.getCi()+"");
 		wwN.setBtsName(cell.getBtsName());
 		wwN.setNetType(Constants.CDMA);// CDMA
 		wwN.setType(Constants.CELL);
@@ -209,7 +209,7 @@ public class BtsStat {
 		wwN.setInt_id(bbu.getIntId());
 		wwN.setCellName(bbu.getName());
 		wwN.setBtsId(bbu.getBtsId());
-		wwN.setBscName(bbu.getBscName());
+		wwN.setBscName(bbu.getBtsId()+"");
 		wwN.setNetType(Constants.CDMA);// CDMA
 		wwN.setCityId(InitInstance.getInstance().getCityId(
 				bbu.getSourceCityId() + ""));
